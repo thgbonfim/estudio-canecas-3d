@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,6 +61,7 @@
             border-color: rgba(139, 92, 246, 0.9);
             box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
         }
+        /* Custom typing cursor for AI thought process */
         .typing::after {
             content: '|';
             animation: blink 0.8s infinite;
@@ -85,7 +86,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <span id="designerStatusBadge" class="text-xs text-violet-300 bg-violet-950/40 px-3.5 py-1.5 rounded-full border border-violet-800/30 font-mono flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-violet-400 animate-ping"></span> Agente "Corel-Bot 3.0" Ativo
+                    <span class="w-2 h-2 rounded-full bg-violet-400 animate-ping"></span> Agente "Corel-Bot 3.0" Online
                 </span>
                 <span id="clientStatusBadge" class="hidden text-xs text-emerald-300 bg-emerald-950/40 px-3.5 py-1.5 rounded-full border border-emerald-800/30 font-mono flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Modo de Aprovação de Projeto
@@ -94,7 +95,7 @@
         </div>
     </header>
 
-    <!-- Notificação Toast -->
+    <!-- Notification Toast -->
     <div id="toastNotification" class="fixed top-20 right-6 z-50 transform translate-x-96 transition-all duration-300 bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-2xl shadow-2xl flex items-center gap-2 border border-emerald-400">
         <i class="fa-solid fa-circle-check text-lg animate-bounce"></i>
         <span id="toastText">Link copiado com sucesso!</span>
@@ -102,11 +103,12 @@
 
     <main class="max-w-7xl mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 w-full flex-grow">
         
-        <!-- PREVIEW DO MOCKUP 3D -->
+        <!-- COLUNA ESQUERDA: PREVIEW DO MOCKUP 3D -->
         <section id="previewSection" class="lg:col-span-6 flex flex-col gap-6 transition-all duration-500">
             
             <div class="relative bg-gradient-to-b from-[#14121F] to-[#0A0811] rounded-3xl border border-violet-950/20 shadow-2xl overflow-hidden group flex flex-col justify-between p-6" style="height: 520px;">
                 
+                <!-- Badge de Estado do Mockup -->
                 <div class="absolute top-4 left-4 z-10 flex flex-col gap-1.5 pointer-events-none">
                     <span class="bg-black/70 backdrop-blur-md text-violet-300 text-xs font-bold font-mono px-3 py-1.5 rounded-full border border-violet-500/30 flex items-center gap-2 w-fit">
                         <span class="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse"></span> MOTOR 3D REALISTA (PBR)
@@ -116,6 +118,7 @@
                     </span>
                 </div>
 
+                <!-- Botões Rápidos de View -->
                 <div class="absolute top-4 right-4 z-10 flex gap-2">
                     <button id="btnAutoRotate" class="p-2.5 bg-black/50 hover:bg-violet-600 rounded-full border border-white/10 text-white transition-all" title="Auto Rotação">
                         <i class="fa-solid fa-arrows-spin text-sm"></i>
@@ -125,17 +128,21 @@
                     </button>
                 </div>
 
+                <!-- Loader de renderização -->
                 <div id="canvasLoader" class="hidden absolute inset-0 bg-black/80 backdrop-blur-md z-20 flex flex-col items-center justify-center gap-4 transition-all">
                     <div class="relative w-20 h-20">
                         <div class="absolute inset-0 rounded-full border-4 border-violet-950/40"></div>
                         <div class="absolute inset-0 rounded-full border-4 border-t-violet-500 border-r-violet-500 animate-spin"></div>
                     </div>
-                    <p class="text-xs font-mono text-violet-300 tracking-wider animate-pulse">A CONSTRUIR A ARTE DE SUBLIMAÇÃO...</p>
+                    <p class="text-xs font-mono text-violet-300 tracking-wider animate-pulse">COREL-BOT ESTÁ CONSTRUINDO A ARTE 205x92mm...</p>
                 </div>
 
-                <!-- Canvas de Renderização 3D -->
-                <div class="w-full h-[380px] rounded-2xl overflow-hidden" id="canvasContainer"></div>
+                <!-- Área Interativa do Canvas de Renderização 3D -->
+                <div class="w-full h-[380px] rounded-2xl overflow-hidden" id="canvasContainer">
+                    <!-- O Three.js vai injetar o Canvas realista aqui -->
+                </div>
 
+                <!-- Painel de Acabamento de Superfície -->
                 <div class="bg-black/60 backdrop-blur-md rounded-2xl p-3 border border-white/5 flex items-center justify-between gap-3">
                     <span class="text-xs font-mono text-gray-400">ACABAMENTO DE ARTE:</span>
                     <div class="flex gap-1.5">
@@ -150,6 +157,7 @@
 
             </div>
 
+            <!-- Botões Rápidos de Exportação e Compartilhamento -->
             <div class="flex flex-col gap-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button id="btnDownloadMockup" class="bg-gotham-card hover:bg-gotham-card/80 text-white py-3.5 px-6 rounded-2xl border border-white/15 transition-all font-bold flex items-center justify-center gap-2">
@@ -161,7 +169,7 @@
                 </div>
                 <div class="grid grid-cols-1 gap-4">
                     <button id="btnShareClient" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-4 px-6 rounded-2xl shadow-lg shadow-violet-600/20 transition-all font-extrabold flex items-center justify-center gap-2.5 text-base border border-violet-400/20">
-                        <i class="fa-solid fa-share-nodes text-xl animate-pulse"></i> 🔗 COPIAR LINK CURTO DO CLIENTE
+                        <i class="fa-solid fa-share-nodes text-xl"></i> 🔗 GERAR E COPIAR LINK DO CLIENTE
                     </button>
                 </div>
                 <button id="btnClearAllArt" class="w-full bg-red-950/20 hover:bg-red-900/30 text-red-300 py-3 px-6 rounded-2xl border border-red-900/30 hover:border-red-500/50 transition-all font-bold flex items-center justify-center gap-2 text-xs shadow-lg shadow-red-950/10">
@@ -171,9 +179,10 @@
 
         </section>
 
-        <!-- CONSOLE AGENTE IA & AJUSTES DE ARTE -->
+        <!-- COLUNA DIREITA: CONSOLE AGENTE IA & AJUSTES DE ARTE -->
         <section id="controlSection" class="lg:col-span-6 flex flex-col gap-6 transition-all duration-500">
             
+            <!-- PAINEL DE EDIÇÃO -->
             <div id="designerPanel" class="bg-gotham-card rounded-3xl p-6 border border-white/5 shadow-2xl flex flex-col gap-6 transition-all">
                 
                 <div class="flex border-b border-white/10 pb-4">
@@ -185,7 +194,7 @@
                     </button>
                 </div>
 
-                <!-- ABA 1: AGENTE IA -->
+                <!-- ABA 1: AGENTE IA DE CRIAÇÃO -->
                 <div id="panelAI" class="flex flex-col gap-5">
                     
                     <div class="bg-violet-950/20 rounded-2xl p-4 border border-violet-950/50 flex gap-3">
@@ -193,11 +202,12 @@
                             <i class="fa-solid fa-brain"></i>
                         </div>
                         <div class="text-xs leading-relaxed text-gray-300">
-                            <strong class="text-white block mb-1">Tecnologia Smart Assets Ativa:</strong>
-                            Guarda as tuas artes na pasta local <code class="bg-black/50 px-1 py-0.5 rounded text-violet-300 font-mono">imagem/</code> ou <code class="bg-black/50 px-1 py-0.5 rounded text-violet-300 font-mono">imagens/</code> do teu projeto. O sistema gerará links super curtos automaticamente!
+                            <strong class="text-white block mb-1">Área Própria de Sublimação Real:</strong>
+                            Toda arte gerada ou carregada é recortada exatamente para **205mm × 92mm**. O sistema deixa as bordas brancas da alça perfeitas para a prensa térmica.
                         </div>
                     </div>
 
+                    <!-- Input / Prompt da Inteligência Artificial -->
                     <div class="flex flex-col gap-2">
                         <label class="text-xs font-mono text-gray-400 flex justify-between">
                             <span>INSIRA O SEU DESEJO CRIATIVO:</span>
@@ -211,6 +221,7 @@
                         </div>
                     </div>
 
+                    <!-- Prompts de Inspiração Rápida -->
                     <div class="flex flex-col gap-2">
                         <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Ideias Rápidas para o Mostruário:</span>
                         <div class="flex flex-wrap gap-2">
@@ -229,13 +240,14 @@
                         </div>
                     </div>
 
+                    <!-- Caixa de Feedback / Diálogo do Agente de IA -->
                     <div id="aiConsoleBox" class="bg-black/60 border border-violet-950/40 rounded-2xl p-4 font-mono text-xs flex flex-col gap-2 min-h-[140px] justify-between">
                         <div class="flex justify-between items-center text-gray-500 border-b border-white/5 pb-1.5">
                             <span><i class="fa-solid fa-brain"></i> PROCESSADOR NEURAL COREL-BOT:</span>
                             <span id="aiStatusBadge" class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Pronto para criar</span>
                         </div>
                         <div id="aiThoughtLog" class="text-violet-300/95 leading-relaxed overflow-y-auto max-h-[100px]">
-                            "Olá! Gabarito técnico calibrado para 205x92mm. Sistema de compactação inteligente de links configurado e pronto a voar!"
+                            "Olá! Gabarito técnico atualizado para 205x92mm. Toda arte que criarmos agora sairá no tamanho exato para a prensa térmica de canecas cilíndricas!"
                         </div>
                         <div class="text-[10px] text-gray-600 border-t border-white/5 pt-1 flex justify-between">
                             <span>Resolução Real: 205mm x 92mm</span>
@@ -245,22 +257,24 @@
 
                 </div>
 
-                <!-- ABA 2: CONFIGURAR MANUAL -->
+                <!-- ABA 2: MANUAL EDITOR DE ARTE -->
                 <div id="panelManual" class="hidden flex flex-col gap-5">
                     
+                    <!-- Importar Arte Completa (Full Wrap Sublimação) -->
                     <div class="bg-gradient-to-r from-violet-600/10 to-indigo-600/10 rounded-2xl p-4 border border-violet-500/30 flex flex-col gap-3">
                         <span class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
                             <i class="fa-solid fa-cloud-arrow-up text-sm"></i> ENVIAR ARTE COMPLETA (GABARITO 205x92mm)
                         </span>
                         <input type="file" id="inputFullBanner" accept="image/*" class="w-full text-xs text-gotham-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-500 bg-transparent cursor-pointer">
                         <div class="flex items-center justify-between gap-2 mt-1">
-                            <div id="uploadBannerFeedback" class="hidden text-[10px] text-green-400 font-mono"><i class="fa-solid fa-circle-check"></i> Arte de sublimação aplicada!</div>
+                            <div id="uploadBannerFeedback" class="hidden text-[10px] text-green-400 font-mono"><i class="fa-solid fa-circle-check"></i> Arte redimensionada para 205x92mm aplicada!</div>
                             <button id="btnResetFullBanner" class="text-[10px] text-red-400 hover:text-red-300 font-mono flex items-center gap-1 transition-all ml-auto">
                                 <i class="fa-solid fa-trash-can"></i> Limpar / Voltar ao Editor
                             </button>
                         </div>
                     </div>
 
+                    <!-- Acabamento e Cores Físicas -->
                     <div class="grid grid-cols-2 gap-4 bg-black/30 p-4 rounded-2xl border border-white/5">
                         <div>
                             <label class="block text-xs font-medium mb-1.5 text-gotham-light">PORCELANA (FORA):</label>
@@ -278,6 +292,7 @@
                         </div>
                     </div>
 
+                    <!-- Customizar Lado A: Logo / Símbolo -->
                     <div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex flex-col gap-4">
                         <span class="text-xs font-mono tracking-wider font-bold text-violet-400">LADO A: LOGOTIPO OU IMAGEM</span>
                         
@@ -299,8 +314,9 @@
                         </div>
                     </div>
 
+                    <!-- Customizar Lado B: Textos -->
                     <div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex flex-col gap-4">
-                        <span class="text-xs font-mono tracking-wider font-bold text-violet-400">LADO B: FRASE PERSONALIZADA</span>
+                        <span class="text-xs font-mono tracking-wider font-bold text-violet-400">LADO B: FRASE PERSONALIZADA (VERSO)</span>
                         
                         <div>
                             <label class="block text-xs font-medium mb-1.5 text-gotham-light">TEXTO DO VERSO (LINHA 1):</label>
@@ -340,7 +356,7 @@
                 <div class="flex flex-col gap-2 text-center border-b border-white/10 pb-4">
                     <span class="text-[10px] font-mono tracking-widest text-emerald-400 font-extrabold uppercase">Apresentação de Produto Exclusiva</span>
                     <h2 class="text-2xl font-black text-white tracking-wide">AVALIAÇÃO DO PROJETO 3D</h2>
-                    <p class="text-xs text-gotham-light/70">Gira a caneca em 3D e altera o acabamento para conferir a estampa oficial de 205x92mm.</p>
+                    <p class="text-xs text-gotham-light/70">Gire a caneca em 3D e mude o acabamento para conferir a estampa oficial de 205x92mm.</p>
                 </div>
 
                 <div class="bg-emerald-950/20 border border-emerald-500/30 rounded-2xl p-4 flex gap-3">
@@ -349,10 +365,11 @@
                     </div>
                     <div class="text-xs leading-relaxed text-emerald-300">
                         <strong class="text-white block mb-1">Como funciona a aprovação?</strong>
-                        Se estiveres satisfeito com o design, clica em **Aprovar Projeto** para confirmar. Se quiseres alterar cores, textos ou imagens, usa o botão **Solicitar Ajustes**.
+                        Se estiver satisfeito com o design, clique em **Aprovar Projeto** para confirmar. Se quiser alterar cores, textos ou imagens, use o botão **Solicitar Ajustes** para enviar seu feedback ao designer.
                     </div>
                 </div>
 
+                <!-- Botões do Cliente -->
                 <div class="flex flex-col gap-4">
                     <button id="btnApproveDesign" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white py-4 px-6 rounded-2xl shadow-xl shadow-emerald-950/40 transition-all font-black text-lg flex items-center justify-center gap-2.5 border border-emerald-400/30">
                         <i class="fa-solid fa-circle-check text-xl"></i> APROVAR PROJETO COMPLETO
@@ -363,16 +380,18 @@
                     </button>
                 </div>
 
-                <div id="feedbackTextContainer" class="hidden flex flex-col gap-3 p-4 bg-black/40 rounded-2xl border border-white/5">
-                    <label class="text-xs font-mono text-gray-400 uppercase tracking-wider block">O que gostarias de ajustar na arte?</label>
-                    <textarea id="feedbackText" rows="3" class="w-full bg-[#12131C] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-violet-500 transition-all font-medium" placeholder="Ex: Mudar a cor de fundo para azul-marinho..."></textarea>
+                <!-- Campo de Feedback Invisível -->
+                <div id="feedbackTextContainer" class="hidden flex flex-col gap-3 p-4 bg-black/40 rounded-2xl border border-white/5 animate-fadeIn">
+                    <label class="text-xs font-mono text-gray-400 uppercase tracking-wider block">O que você gostaria de ajustar na arte?</label>
+                    <textarea id="feedbackText" rows="3" class="w-full bg-[#12131C] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-violet-500 transition-all font-medium" placeholder="Ex: Mudar a cor de fundo para azul marinho e colocar a frase menor..."></textarea>
                     <button id="btnCopyFeedback" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 ml-auto transition-all">
                         <i class="fa-solid fa-copy"></i> Copiar e Enviar no WhatsApp
                     </button>
                 </div>
 
+                <!-- Botão Secreto/Discreto para Retornar ao Modo Designer -->
                 <button id="btnExitViewer" class="text-center text-[10px] text-gray-600 hover:text-white transition-all underline font-mono mt-2">
-                    <i class="fa-solid fa-lock-open mr-1"></i> Voltar ao Painel do Designer
+                    <i class="fa-solid fa-lock-open mr-1"></i> Modo Administrador (Voltar para o Editor)
                 </button>
 
             </div>
@@ -387,33 +406,34 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-map text-violet-400"></i> BANNER DE IMPRESSÃO (GABARITO 205x92mm)
+                        <i class="fa-solid fa-map text-violet-400"></i> BANNER DE IMPRESSÃO (SUBLIMAÇÃO REAL - GABARITO 205x92mm)
                     </h3>
-                    <p class="text-xs text-gotham-light/70">Este é o ficheiro de impressão. O vão branco traseiro encaixa exatamente na alça da caneca física.</p>
+                    <p class="text-xs text-gotham-light/70">Este é o arquivo que será impresso para a prensa. As bordas brancas representam as margens de proteção ao redor da alça.</p>
                 </div>
                 <span class="text-xs bg-violet-500/15 border border-violet-500/30 text-violet-400 px-3 py-1 rounded font-mono font-bold">
-                    Gabarito Oficial: 1025px × 460px (205:92)
+                    Resolução de Tela: 1025px × 460px (Proporção Exata 205:92)
                 </span>
             </div>
             
+            <!-- Blueprint Canvas -->
             <div class="w-full overflow-x-auto flex justify-center bg-zinc-950 p-4 rounded-2xl border border-white/10">
+                <!-- Redimensionado matematicamente para 1025 x 460 para corresponder perfeitamente ao tamanho físico 205x92mm -->
                 <canvas id="bannerCanvas" width="1025" height="460" class="max-w-full rounded border border-dashed border-gray-600 bg-black"></canvas>
             </div>
         </div>
     </section>
 
+    <!-- Footer Geral -->
     <footer class="border-t border-gotham-card bg-black/90 py-6 px-4 text-center text-xs text-gotham-light/40 font-mono mt-12">
-        <p>© 2026 MugStudio IA. Estúdio de Sublimação de Canecas com Gabarito Técnico Homologado.</p>
+        <p>© 2026 MugStudio IA. Estúdio de Sublimação Real com Gabarito Técnico Homologado.</p>
     </footer>
 
     <script>
-        // --- 1. ESTADO GLOBAL ---
+        // --- 1. CONFIGURAÇÕES E ESTADO DO APP ---
         const state = {
             theme: 'batman',        
             customLogoImage: null,  
-            customLogoName: null,      
             customFullBannerImage: null, 
-            customFullBannerName: null,  
             finish: 'matte',        
             exteriorColor: '#121214',
             interiorColor: '#FFD700',
@@ -429,12 +449,13 @@
             aiVectorShape: 'batman-sigil' 
         };
 
-        // --- 2. ELEMENTOS DO DOM ---
+        // --- 2. REGISTRO DE ELEMENTOS ---
         const bannerCanvas = document.getElementById('bannerCanvas');
         const bannerCtx = bannerCanvas.getContext('2d');
         const canvasContainer = document.getElementById('canvasContainer');
         const canvasLoader = document.getElementById('canvasLoader');
         
+        // Controles Manuais
         const colorExterior = document.getElementById('colorExterior');
         const hexExterior = document.getElementById('hexExterior');
         const colorInterior = document.getElementById('colorInterior');
@@ -446,6 +467,7 @@
         const selectFont = document.getElementById('selectFont');
         const colorText = document.getElementById('colorText');
 
+        // Controles de Abas e Interface de IA
         const tabAI = document.getElementById('tabAI');
         const tabManual = document.getElementById('tabManual');
         const panelAI = document.getElementById('panelAI');
@@ -455,12 +477,14 @@
         const aiThoughtLog = document.getElementById('aiThoughtLog');
         const aiStatusBadge = document.getElementById('aiStatusBadge');
 
+        // Uploads
         const inputCustomLogo = document.getElementById('inputCustomLogo');
         const uploadFeedback = document.getElementById('uploadFeedback');
         const inputFullBanner = document.getElementById('inputFullBanner');
         const btnResetFullBanner = document.getElementById('btnResetFullBanner');
         const uploadBannerFeedback = document.getElementById('uploadBannerFeedback');
 
+        // Botões de Interação
         const btnFinishMatte = document.getElementById('btnFinishMatte');
         const btnFinishGlossy = document.getElementById('btnFinishGlossy');
         const btnAutoRotate = document.getElementById('btnAutoRotate');
@@ -469,6 +493,7 @@
         const btnDownloadBanner = document.getElementById('btnDownloadBanner');
         const btnClearAllArt = document.getElementById('btnClearAllArt');
 
+        // Novos Botões & Elementos do Viewer do Cliente
         const btnShareClient = document.getElementById('btnShareClient');
         const designerPanel = document.getElementById('designerPanel');
         const clientPanel = document.getElementById('clientPanel');
@@ -484,49 +509,58 @@
         const toastNotification = document.getElementById('toastNotification');
         const toastText = document.getElementById('toastText');
 
-        // --- 3. VARIÁVEIS THREE.JS ---
+        // --- 3. VARIÁVEIS DO ENGINE THREE.JS ---
         let scene, camera, renderer, orbitControls;
         let mugGroup; 
         let mugOuterMesh, mugInnerMesh, mugRimMesh, mugBottomCapMesh, mugInnerFloorMesh, mugHandleMesh;
         let canvasTexture; 
 
-        // --- 4. ENGINE DE DESENHO VETORIAL PARA O GABARITO ---
+        // --- 4. ENGINE DE DESENHO VETORIAL PARA O BANNER (COM ÁREA DE SEGURANÇA BRANCA) ---
         function drawFlatBanner() {
             const w = bannerCanvas.width;
             const h = bannerCanvas.height;
             
+            // Limpa o canvas
             bannerCtx.clearRect(0, 0, w, h);
 
-            // Base de Porcelana Branca
+            // 1. BASE DE PORCELANA DA CANECA (Sempre branca para simular sublimação real)
             bannerCtx.fillStyle = '#FFFFFF';
             bannerCtx.fillRect(0, 0, w, h);
 
-            // Área de Segurança Lateral (Encontro da alça)
+            // 2. CÁLCULO DE ÁREA ÚTIL DE IMPRESSÃO (Deixa 8% livre em cada lateral da alça)
             const marginX = w * 0.08; 
             const printW = w - (marginX * 2);
 
+            // Se possuir imagem completa de banner (via Upload ou Gerador Generativo IA)
             if (state.customFullBannerImage) {
-                // Desenha a arte carregada perfeitamente na área de impressão de 205x92mm
+                // Desenha a estampa centralizada na área útil de impressão de 205x92mm
                 bannerCtx.drawImage(state.customFullBannerImage, marginX, 0, printW, h);
             } else {
+                // Fundo Sólido da estampa (somente na área útil)
                 bannerCtx.fillStyle = state.exteriorColor;
                 bannerCtx.fillRect(marginX, 0, printW, h);
 
+                // Centraliza o Lado A (Frente) e Lado B (Verso) dentro da área útil impressa
+                // Invertido para compensar a rotação de 180 graus da textura e manter o logo na frente
                 const cxA = marginX + (printW * 0.75);
                 const cxB = marginX + (printW * 0.25);
 
+                // --- LADO A: LOGO / ÍCONE ---
                 if (state.aiVectorShape !== 'none') {
                     drawAIVector(bannerCtx, cxA, h * 0.5, state.logoScale, state.aiVectorShape, state.logoColor, state.interiorColor);
                 }
 
+                // --- LADO B: TEXTO E HIERARQUIA ---
                 if (state.textLine1 || state.textLine2) {
                     drawBannerText(bannerCtx, cxB, h * 0.5);
                 }
             }
 
+            // Atualiza textura 3D do Three.js
             if (canvasTexture) canvasTexture.needsUpdate = true;
         }
 
+        // Desenho dos Vetores Inteligentes no Lado A
         function drawAIVector(ctx, cx, cy, scaleFactor, shapeType, color, highlightColor) {
             ctx.save();
             ctx.translate(cx, cy);
@@ -534,6 +568,7 @@
             const scale = (scaleFactor / 100) * 2.2;
             ctx.scale(scale, scale);
 
+            // Se possuir imagem de logotipo enviada pelo usuário
             if (state.customLogoImage) {
                 const img = state.customLogoImage;
                 const maxDim = 110;
@@ -550,6 +585,7 @@
             ctx.lineWidth = 3;
 
             if (shapeType === 'batman-sigil') {
+                // Escudo de Fundo Amarelo Gotham
                 ctx.fillStyle = highlightColor;
                 ctx.beginPath();
                 ctx.ellipse(0, 0, 75, 42, 0, 0, 2 * Math.PI);
@@ -558,6 +594,7 @@
                 ctx.lineWidth = 4;
                 ctx.stroke();
 
+                // Morcego do Batman
                 ctx.fillStyle = '#000000';
                 ctx.beginPath();
                 ctx.moveTo(0, -18); 
@@ -629,6 +666,7 @@
                 ctx.fillRect(16, -18, 6, 36);
             }
             else if (shapeType === 'mario-m') {
+                // Rosto do Mario de Alta Definição Vetorial
                 ctx.fillStyle = '#5c2c16';
                 ctx.beginPath();
                 ctx.arc(-30, -2, 11, 0, Math.PI * 2);
@@ -786,6 +824,7 @@
             ctx.restore();
         }
 
+        // Desenho da Tipografia e Hierarquia no Verso
         function drawBannerText(ctx, cx, cy) {
             if (!state.textLine1 && !state.textLine2) return;
             ctx.save();
@@ -819,7 +858,7 @@
             ctx.restore();
         }
 
-        // --- 5. INICIALIZAR THREE.JS (PBR MOTOR 3D) ---
+        // --- 5. INITIALIZE THREE.JS RENDERER (PBR) ---
         function initThreeJS() {
             const width = canvasContainer.clientWidth;
             const height = canvasContainer.clientHeight;
@@ -869,6 +908,8 @@
             canvasTexture.wrapS = THREE.RepeatWrapping;
             canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
             
+            // Correção de Projeção Cilíndrica PBR:
+            // Ajustado offset.x para 0.75 para alinhar a emenda branca da textura diretamente embaixo da alça física (à esquerda).
             canvasTexture.repeat.set(-1, 1);
             canvasTexture.offset.set(0.75, 0);
 
@@ -880,7 +921,7 @@
             const hHalf = heightMug / 2;
             const thickness = 0.24;
 
-            // Corpo Externo
+            // 1. Corpo Externo PBR (Recebe o Canvas do Banner com as bordas brancas da alça)
             const outerGeo = new THREE.CylinderGeometry(radius, radius, heightMug, 64, 1, true);
             const outerMat = new THREE.MeshPhysicalMaterial({
                 map: canvasTexture,
@@ -895,7 +936,7 @@
             mugOuterMesh.receiveShadow = true;
             mugGroup.add(mugOuterMesh);
 
-            // Interior
+            // 2. Interior Esmaltado Brilhante (Cor customizada do Tema)
             const innerGeo = new THREE.CylinderGeometry(radius - thickness, radius - thickness, heightMug - thickness, 64, 1, true);
             const innerMat = new THREE.MeshPhysicalMaterial({
                 color: new THREE.Color(state.interiorColor),
@@ -908,13 +949,13 @@
             mugInnerMesh.position.y = thickness / 2;
             mugGroup.add(mugInnerMesh);
 
-            // Chão Interno
+            // 3. Chão Interno da Caneca
             const innerFloorGeo = new THREE.CylinderGeometry(radius - thickness, radius - thickness, thickness, 64, 1, false);
             mugInnerFloorMesh = new THREE.Mesh(innerFloorGeo, innerMat);
             mugInnerFloorMesh.position.y = -hHalf + thickness;
             mugGroup.add(mugInnerFloorMesh);
 
-            // Base Externa (Branca) - Anti Z-fighting
+            // 4. Base Externa da Caneca (Mantém cerâmica branca de sublimação real)
             const bottomCapGeo = new THREE.CylinderGeometry(radius - 0.01, radius - 0.01, thickness, 64, 1, false);
             const bottomCapMat = new THREE.MeshPhysicalMaterial({
                 color: new THREE.Color('#FFFFFF'),
@@ -928,7 +969,7 @@
             mugBottomCapMesh.receiveShadow = true;
             mugGroup.add(mugBottomCapMesh);
 
-            // Borda Redonda Superior
+            // 5. Borda Superior Cerâmica (Arredondada - Conecta interior e exterior)
             const rimGeo = new THREE.TorusGeometry(radius - thickness / 2, thickness / 2, 16, 64);
             const rimMat = new THREE.MeshPhysicalMaterial({
                 color: new THREE.Color(state.interiorColor),
@@ -941,7 +982,7 @@
             mugRimMesh.position.y = hHalf;
             mugGroup.add(mugRimMesh);
 
-            // Alça em "C"
+            // 6. Alça Anatômica em "C" (Cor customizável em harmonia com o interior)
             const handleGeo = new THREE.TorusGeometry(2.0, 0.38, 16, 64, Math.PI);
             const handleMat = new THREE.MeshPhysicalMaterial({
                 color: new THREE.Color(state.interiorColor),
@@ -956,7 +997,7 @@
             mugHandleMesh.castShadow = true;
             mugGroup.add(mugHandleMesh);
 
-            // Chão de Sombras
+            // Plano Invisível para Sombras no Chão
             const groundGeo = new THREE.PlaneGeometry(50, 50);
             const groundMat = new THREE.ShadowMaterial({ opacity: 0.45 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
@@ -977,6 +1018,7 @@
             renderer.setSize(width, height);
         }
 
+        // --- 6. ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
 
@@ -988,20 +1030,24 @@
             renderer.render(scene, camera);
         }
 
+        // --- 7. SYNC MATERIALS WITH STATE ---
         function update3DMaterials() {
             if (!mugOuterMesh) return;
 
             const isMatte = state.finish === 'matte';
             
+            // Corpo Externo
             mugOuterMesh.material.roughness = isMatte ? 0.72 : 0.15;
             mugOuterMesh.material.clearcoat = isMatte ? 0.0 : 1.0;
             mugOuterMesh.material.clearcoatRoughness = isMatte ? 0.0 : 0.08;
 
+            // Interior e Borda
             const intColor = new THREE.Color(state.interiorColor);
             mugInnerMesh.material.color = intColor;
             mugInnerFloorMesh.material.color = intColor;
             mugRimMesh.material.color = intColor;
 
+            // Alça Cerâmica
             mugHandleMesh.material.color = intColor;
             mugHandleMesh.material.roughness = isMatte ? 0.72 : 0.15;
             mugHandleMesh.material.clearcoat = isMatte ? 0.0 : 1.0;
@@ -1016,10 +1062,9 @@
             hexInterior.innerText = state.interiorColor.toUpperCase();
         }
 
-        // --- 6. INTEGRAÇÃO DA IA E SEGURANÇA LOCAL ---
+        // --- 8. MOTOR DE INTELIGÊNCIA ARTIFICIAL GENERATIVA ---
         function generateLocalFallbackArt(query, originalPrompt) {
             state.customFullBannerImage = null; 
-            state.customFullBannerName = null;
             state.theme = 'custom';
             
             if (query.includes("mario") && (query.includes("surf") || query.includes("prancha"))) {
@@ -1087,7 +1132,7 @@
             canvasLoader.classList.remove('hidden');
             aiStatusBadge.className = "text-violet-400 flex items-center gap-1";
             aiStatusBadge.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Conectando à Rede Neural...`;
-            aiThoughtLog.innerHTML = `<span class="typing">Corel-Bot 3.0 está a desenhar a tua arte com IA...</span>`;
+            aiThoughtLog.innerHTML = `<span class="typing">Corel-Bot 3.0 está consultando a rede neural para criar o design generativo de "${prompt}"...</span>`;
 
             let queryEnglish = query;
             if (query.includes("street fighter") || query.includes("ryu") || query.includes("hadouken") || query.includes("fighter")) {
@@ -1101,6 +1146,7 @@
             }
 
             const randomSeed = Math.floor(Math.random() * 999999);
+            // Redimensionado para 1025 x 460 pixels para corresponder à proporção 205x92mm sem esticar
             const width = 1025;
             const height = 460; 
             
@@ -1111,7 +1157,6 @@
             
             img.onload = function() {
                 state.customFullBannerImage = img; 
-                state.customFullBannerName = null;
                 state.theme = 'custom';
                 
                 if (query.includes("mario")) {
@@ -1134,7 +1179,7 @@
                 canvasLoader.classList.add('hidden');
                 aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
                 aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte Criada com Sucesso!`;
-                aiThoughtLog.innerHTML = `Sucesso! O Corel-Bot 3.0 gerou digitalmente: "${prompt}". A estampa já foi perfeitamente adaptada ao gabarito de 205x92mm.`;
+                aiThoughtLog.innerHTML = `Sucesso! O Corel-Bot 3.0 desenhou digitalmente: "${prompt}". A estampa já foi perfeitamente adaptada ao gabarito real de 205x92mm com margem branca traseira.`;
 
                 updateApp();
             };
@@ -1146,7 +1191,7 @@
             img.src = imageUrl;
         }
 
-        // --- 7. NOTIFICAÇÕES E ENGINE DE COMPRESSÃO DE LINK DE PARTILHA ---
+        // --- 9. MOTOR DE COMPARTILHAMENTO DE LINK (MODO VIEWER) COM COMPRESSÃO INTEGRADA ---
         function showToast(text, duration = 3000) {
             toastText.innerText = text;
             toastNotification.classList.remove('translate-x-96');
@@ -1155,93 +1200,43 @@
             }, duration);
         }
 
-        // Comprime imagens locais de forma otimizada para o link (380px de largura e 0.35 de qualidade)
-        function getCompressedImageBase64(img, maxWidth = 380, quality = 0.35) {
+        function getCompressedImageBase64(img, maxWidth = 800) {
             return new Promise((resolve) => {
                 if (!img) return resolve(null);
                 try {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
+                    // Mantém a proporção exata da estampa 205x92mm
                     const scale = Math.min(1, maxWidth / img.width);
                     canvas.width = img.width * scale;
                     canvas.height = img.height * scale;
                     
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    
+                    // Compressão balanceada (qualidade 0.75) para alta nitidez mantendo o link perfeitamente funcional
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
                     resolve(compressedDataUrl);
                 } catch (e) {
-                    console.error("Erro ao comprimir imagem:", e);
+                    console.error("Erro ao comprimir imagem de transferência:", e);
                     resolve(null);
                 }
             });
         }
 
-        // Compactador de URL nativo por Deflate
-        async function compressStringToBase64(string) {
-            try {
-                const byteArray = new TextEncoder().encode(string);
-                const cs = new CompressionStream('deflate');
-                const writer = cs.writable.getWriter();
-                writer.write(byteArray);
-                writer.close();
-                const response = new Response(cs.readable);
-                const arrayBuffer = await response.arrayBuffer();
-                
-                let binary = '';
-                const bytes = new Uint8Array(arrayBuffer);
-                const len = bytes.byteLength;
-                for (let i = 0; i < len; i++) {
-                    binary += String.fromCharCode(bytes[i]);
-                }
-                return btoa(binary);
-            } catch (e) {
-                return btoa(unescape(encodeURIComponent(string)));
-            }
-        }
-
-        // Descompactador de URL
-        async function decompressBase64ToString(base64) {
-            try {
-                const binary = atob(base64);
-                const bytes = new Uint8Array(binary.length);
-                for (let i = 0; i < binary.length; i++) {
-                    bytes[i] = binary.charCodeAt(i);
-                }
-                const ds = new DecompressionStream('deflate');
-                const writer = ds.writable.getWriter();
-                writer.write(bytes);
-                writer.close();
-                const response = new Response(ds.readable);
-                const arrayBuffer = await response.arrayBuffer();
-                return new TextDecoder().decode(arrayBuffer);
-            } catch (e) {
-                return decodeURIComponent(escape(atob(base64)));
-            }
-        }
-
         async function generateShareLink() {
-            showToast("⚡ A preparar link otimizado...", 2000);
+            showToast("⚡ Preparando e comprimindo o seu link...", 2500);
             try {
                 let fullArtData = null;
                 let isUrl = false;
 
-                // MOTOR DE DETEÇÃO INTELIGENTE DO GITHUB:
-                // Se estivermos no GitHub Pages (online) e houver um nome de ficheiro,
-                // apontamos apenas o caminho relativo de forma extremamente curta!
-                const isHostedOnGit = window.location.hostname.includes('github.io') || 
-                                     (window.location.hostname !== 'localhost' && 
-                                      window.location.hostname !== '127.0.0.1' && 
-                                      window.location.protocol !== 'file:');
-
+                // Processa a imagem do banner principal (enviada por upload ou gerada por IA)
                 if (state.customFullBannerImage) {
-                    if (isHostedOnGit && state.customFullBannerName) {
-                        // Aponta diretamente para a pasta de imagens (suporta imagens/ ou imagem/)
-                        fullArtData = `./imagem/${state.customFullBannerName}`;
-                        isUrl = true;
-                    } else if (state.customFullBannerImage.src.startsWith('data:')) {
-                        fullArtData = await getCompressedImageBase64(state.customFullBannerImage, 380, 0.35);
+                    if (state.customFullBannerImage.src.startsWith('data:')) {
+                        // Se for uma imagem local, comprime com ótimo balanço para caber no link
+                        fullArtData = await getCompressedImageBase64(state.customFullBannerImage, 800);
                     } else {
+                        // Se for uma imagem da web (AI), passa o link diretamente
                         fullArtData = state.customFullBannerImage.src;
                         isUrl = true;
                     }
@@ -1249,11 +1244,7 @@
 
                 let logoData = null;
                 if (state.customLogoImage) {
-                    if (isHostedOnGit && state.customLogoName) {
-                        logoData = `./imagem/${state.customLogoName}`;
-                    } else {
-                        logoData = await getCompressedImageBase64(state.customLogoImage, 180, 0.35);
-                    }
+                    logoData = await getCompressedImageBase64(state.customLogoImage, 300);
                 }
 
                 const stateToSave = {
@@ -1273,12 +1264,15 @@
                     logoData: logoData
                 };
 
+                // Codifica o estado para base64 seguro
                 const jsonStr = JSON.stringify(stateToSave);
-                const compressedBase64 = await compressStringToBase64(jsonStr);
+                const base64Encoded = btoa(unescape(encodeURIComponent(jsonStr)));
                 
+                // Constrói a URL final compartilhável
                 const baseUrl = window.location.href.split('?')[0].split('#')[0];
-                const clientUrl = `${baseUrl}?mode=viewer&s=${compressedBase64}`;
+                const clientUrl = `${baseUrl}?mode=viewer&s=${base64Encoded}`;
 
+                // Copia para área de transferência
                 const dummyTextarea = document.createElement('textarea');
                 document.body.appendChild(dummyTextarea);
                 dummyTextarea.value = clientUrl;
@@ -1286,23 +1280,32 @@
                 document.execCommand('copy');
                 document.body.removeChild(dummyTextarea);
 
-                showToast("🔗 Link curto copiado com sucesso!");
+                showToast("🔗 Link completo gerado e copiado!");
             } catch (err) {
-                console.error("Falha ao gerar link:", err);
-                showToast("❌ Erro ao gerar link.");
+                console.error("Falha ao gerar link comprimido:", err);
+                showToast("❌ Erro ao gerar link de compartilhamento.");
             }
         }
 
+        // Entra no modo de avaliação do cliente (esconde menus de edição)
         function enterViewerMode(savedState) {
+            // Oculta painel de design e mostra painel do cliente
             designerPanel.classList.add('hidden');
             clientPanel.classList.remove('hidden');
+            
+            // Oculta seção do blueprint (cliente só precisa ver o 3D)
             bannerSection.classList.add('hidden');
+
+            // Oculta badges do designer e mostra do cliente
             designerStatusBadge.classList.add('hidden');
             clientStatusBadge.classList.remove('hidden');
+
+            // Oculta botões de exportação técnica de arquivos e limpeza
             btnDownloadBanner.classList.add('hidden');
             btnClearAllArt.classList.add('hidden');
             btnShareClient.classList.add('hidden');
 
+            // Aplica o estado carregado da URL
             if (savedState) {
                 state.finish = savedState.finish || 'matte';
                 state.exteriorColor = savedState.exteriorColor || '#121214';
@@ -1324,6 +1327,7 @@
                     btnFinishMatte.className = "py-1 px-3 rounded-lg border border-white/10 text-white bg-transparent hover:border-white/20 font-bold text-[11px] transition-all";
                 }
 
+                // Restaura o logotipo customizado compactado se houver
                 if (savedState.logoData) {
                     const imgLogo = new Image();
                     imgLogo.crossOrigin = "anonymous";
@@ -1331,15 +1335,10 @@
                         state.customLogoImage = imgLogo;
                         updateApp();
                     };
-                    imgLogo.onerror = function() {
-                        // Tenta resolver no singular caso tenha falhado com plural
-                        if (savedState.logoData.includes('/imagens/')) {
-                            imgLogo.src = savedState.logoData.replace('/imagens/', '/imagem/');
-                        }
-                    };
                     imgLogo.src = savedState.logoData;
                 }
 
+                // Restaura a estampa inteira (Full Banner) compactada ou via URL
                 if (savedState.fullArtData) {
                     canvasLoader.classList.remove('hidden');
                     const img = new Image();
@@ -1350,13 +1349,8 @@
                         updateApp();
                     };
                     img.onerror = function() {
-                        // Tenta resolver no singular caso tenha falhado com plural
-                        if (savedState.fullArtData.includes('/imagens/')) {
-                            img.src = savedState.fullArtData.replace('/imagens/', '/imagem/');
-                        } else {
-                            canvasLoader.classList.add('hidden');
-                            updateApp();
-                        }
+                        canvasLoader.classList.add('hidden');
+                        updateApp();
                     };
                     img.src = savedState.fullArtData;
                 } else {
@@ -1365,29 +1359,31 @@
             }
         }
 
+        // Sai do modo de avaliação e volta para o designer
         function exitViewerMode() {
             window.location.search = ""; 
         }
 
-        async function checkUrlState() {
+        // Verifica se a URL contém estado pré-configurado
+        function checkUrlState() {
             const params = new URLSearchParams(window.location.search);
             const stateParam = params.get('s');
             const modeParam = params.get('mode');
 
             if (stateParam) {
                 try {
-                    const decompressedStr = await decompressBase64ToString(stateParam);
-                    const savedState = JSON.parse(decompressedStr);
+                    const decodedStr = decodeURIComponent(escape(atob(stateParam)));
+                    const savedState = JSON.parse(decodedStr);
                     enterViewerMode(savedState);
                 } catch (err) {
-                    console.error("Falha ao descomprimir link de cliente:", err);
+                    console.error("Falha ao descriptografar estado do cliente:", err);
                 }
             } else if (modeParam === 'viewer') {
                 enterViewerMode(null);
             }
         }
 
-        // --- 8. LISTENERS DO CONTROLADOR ---
+        // --- 10. LISTENERS DE INTERFACE E EVENTOS ---
 
         tabAI.addEventListener('click', () => {
             tabAI.className = "flex-1 py-2 text-center font-bold text-sm text-violet-400 border-b-2 border-violet-500 transition-all flex items-center justify-center gap-2";
@@ -1459,14 +1455,12 @@
         inputCustomLogo.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                state.customLogoName = file.name; 
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const img = new Image();
                     img.onload = function() {
                         state.customLogoImage = img;
                         state.customFullBannerImage = null;
-                        state.customFullBannerName = null;
                         uploadFeedback.classList.remove('hidden');
                         uploadBannerFeedback.classList.add('hidden');
                         updateApp();
@@ -1480,14 +1474,12 @@
         inputFullBanner.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                state.customFullBannerName = file.name; 
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const img = new Image();
                     img.onload = function() {
                         state.customFullBannerImage = img;
                         state.customLogoImage = null;
-                        state.customLogoName = null;
                         uploadBannerFeedback.classList.remove('hidden');
                         uploadFeedback.classList.add('hidden');
                         updateApp();
@@ -1500,7 +1492,6 @@
 
         btnResetFullBanner.addEventListener('click', () => {
             state.customFullBannerImage = null;
-            state.customFullBannerName = null;
             inputFullBanner.value = '';
             uploadBannerFeedback.classList.add('hidden');
             updateApp();
@@ -1573,7 +1564,7 @@
         btnCopyFeedback.addEventListener('click', () => {
             const feedback = feedbackText.value.trim();
             if (feedback === "") {
-                showToast("⚠️ Escreve as alterações que desejas primeiro!");
+                showToast("⚠️ Escreva o que você deseja mudar primeiro!");
                 return;
             }
             
@@ -1586,16 +1577,14 @@
             document.execCommand('copy');
             document.body.removeChild(dummyTextarea);
 
-            showToast("📋 Alterações copiadas! Envia para o Designer.");
+            showToast("📋 Alterações copiadas! Envie para o Designer.");
         });
 
         btnExitViewer.addEventListener('click', exitViewerMode);
 
         btnClearAllArt.addEventListener('click', () => {
             state.customLogoImage = null;
-            state.customLogoName = null;
             state.customFullBannerImage = null;
-            state.customFullBannerName = null;
             state.textLine1 = '';
             state.textLine2 = '';
             state.aiVectorShape = 'none';
@@ -1621,7 +1610,7 @@
 
             aiStatusBadge.className = "text-gray-400 flex items-center gap-1.5 font-bold";
             aiStatusBadge.innerHTML = `<i class="fa-solid fa-circle-notch"></i> Caneca Virgem`;
-            aiThoughtLog.innerHTML = `Limpámos a estampa! A caneca agora está em <strong>porcelana branca lisa</strong> de 205x92mm, totalmente pronta para uma nova arte.`;
+            aiThoughtLog.innerHTML = `O estúdio limpou toda a estampa anterior! A caneca agora está configurada em <strong>porcelana branca lisa</strong> de 205x92mm, totalmente pronta para você criar uma nova arte do zero.`;
         });
 
         window.onload = function() {
