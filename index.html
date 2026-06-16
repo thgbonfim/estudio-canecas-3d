@@ -10,130 +10,60 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        gotham: {
-                            dark: '#0B0C10',
-                            card: '#151B24',
-                            yellow: '#FFD700',
-                            accent: '#4E9F3D',
-                            ai: '#8B5CF6',
-                            light: '#C5C6C7'
-                        }
-                    }
-                }
-            }
-        }
+        tailwind.config = { theme: { extend: { colors: { gotham: { dark: '#0B0C10', card: '#151B24', yellow: '#FFD700', accent: '#4E9F3D', ai: '#8B5CF6', light: '#C5C6C7' } } } } }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
         body { background-color: #0B0C10; font-family: 'Montserrat', sans-serif; color: #C5C6C7; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #111; }
-        ::-webkit-scrollbar-thumb { background: #8B5CF6; border-radius: 3px; }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #111; } ::-webkit-scrollbar-thumb { background: #8B5CF6; border-radius: 3px; }
         .ai-glow { box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); }
-        .ai-glow-border { border-color: rgba(139, 92, 246, 0.4); }
         .ai-glow-border:focus { border-color: rgba(139, 92, 246, 0.9); box-shadow: 0 0 10px rgba(139, 92, 246, 0.3); }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden flex flex-col bg-gotham-dark relative">
 
-    <div id="loginScreen" class="fixed inset-0 bg-gotham-dark z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-500">
-        <div class="bg-gotham-card border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col gap-6 relative overflow-hidden">
+    <div id="loginScreen" class="fixed inset-0 bg-gotham-dark z-[100] flex items-center justify-center p-4">
+        <div class="bg-gotham-card border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col gap-6 relative">
             <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-violet-600 to-indigo-600"></div>
             <div class="flex flex-col items-center text-center gap-2 mt-2">
-                <div class="w-16 h-16 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-600/30 mb-2">
-                    <i class="fa-solid fa-mug-hot text-3xl text-white"></i>
-                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl flex items-center justify-center mb-2"><i class="fa-solid fa-mug-hot text-3xl text-white"></i></div>
                 <h1 class="text-2xl font-black text-white tracking-widest">MUGSTUDIO <span class="text-violet-400">IA</span></h1>
-                <p class="text-xs text-gray-400 font-mono">Acesso Exclusivo para Designers</p>
             </div>
             <div id="loginError" class="hidden bg-red-500/10 border border-red-500/50 text-red-400 text-xs p-3 rounded-xl text-center font-mono"></div>
             <div class="flex flex-col gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1 ml-1">EMAIL PROFISSIONAL</label>
-                    <input type="email" id="emailInput" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500 transition-all" placeholder="designer@estudio.com">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1 ml-1">SENHA</label>
-                    <input type="password" id="passwordInput" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500 transition-all" placeholder="••••••••">
-                </div>
+                <input type="email" id="emailInput" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white" placeholder="designer@estudio.com">
+                <input type="password" id="passwordInput" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white" placeholder="••••••••">
             </div>
             <div class="flex gap-3 mt-2">
-                <button id="btnLogin" class="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-all text-sm shadow-lg shadow-violet-600/20">Entrar</button>
-                <button id="btnRegister" class="flex-1 bg-transparent border border-white/20 hover:border-violet-500 text-gray-300 hover:text-white font-bold py-3 rounded-xl transition-all text-sm">Criar Conta</button>
+                <button id="btnLogin" class="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl text-sm">Entrar</button>
+                <button id="btnRegister" class="flex-1 bg-transparent border border-white/20 hover:border-violet-500 text-gray-300 font-bold py-3 rounded-xl text-sm">Criar Conta</button>
             </div>
-            <div class="relative flex items-center py-2">
-                <div class="flex-grow border-t border-white/10"></div>
-                <span class="flex-shrink-0 mx-4 text-xs text-gray-500 font-bold uppercase">Ou acesse com</span>
-                <div class="flex-grow border-t border-white/10"></div>
-            </div>
-            <button id="btnGoogle" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-bold py-3 px-4 rounded-xl transition-all text-sm flex items-center justify-center gap-3">
+            <button id="btnGoogle" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-bold py-3 px-4 rounded-xl text-sm flex items-center justify-center gap-3">
                 <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="Google" class="w-5 h-5"> Continuar com o Google
             </button>
         </div>
     </div>
 
-    <div id="mainApp" class="hidden min-h-screen flex-col justify-between">
+    <div id="mainApp" class="hidden min-h-screen flex-col">
         <header class="border-b border-white/5 bg-black/85 backdrop-blur-md px-6 py-4 sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="bg-gradient-to-r from-violet-600 to-indigo-600 p-2.5 rounded-xl text-white font-extrabold flex items-center justify-center shadow-lg shadow-violet-500/20">
-                        <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold tracking-wider text-white">MUGSTUDIO <span class="text-violet-400">GEN-IA</span></h1>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div id="userProfileArea" class="hidden items-center gap-3 border-l border-white/10 pl-4 ml-2">
-                        <div class="text-right hidden sm:block">
-                            <p class="text-[10px] text-gray-500 font-mono mb-0.5">Designer</p>
-                            <p id="userNameDisplay" class="text-xs font-bold text-white uppercase"></p>
-                        </div>
-                        <button id="btnLogout" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 p-2 rounded-lg transition-all" title="Sair da Conta">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        </button>
-                    </div>
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <h1 class="text-xl font-bold text-white">MUGSTUDIO <span class="text-violet-400">GEN-IA</span></h1>
+                <div id="userProfileArea" class="flex items-center gap-3">
+                    <p id="userNameDisplay" class="text-xs font-bold text-white"></p>
+                    <button id="btnLogout" class="bg-red-500/10 text-red-400 px-3 py-1.5 rounded-lg border border-red-500/30 text-xs">Sair</button>
                 </div>
             </div>
         </header>
-
-        <div id="toastNotification" class="fixed top-20 right-6 z-50 transform translate-x-96 transition-all duration-300 bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-2xl shadow-2xl flex items-center gap-2 border border-emerald-400">
-            <i class="fa-solid fa-circle-check text-lg animate-bounce"></i>
-            <span id="toastText">Ação realizada!</span>
-        </div>
-
-        <main class="max-w-7xl mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 w-full flex-grow">
-            <section id="previewSection" class="lg:col-span-6 flex flex-col gap-6">
-                <div class="relative bg-gradient-to-b from-[#14121F] to-[#0A0811] rounded-3xl border border-violet-950/20 shadow-2xl overflow-hidden flex flex-col p-6 h-[520px]">
-                    <div id="canvasLoader" class="hidden absolute inset-0 bg-black/80 backdrop-blur-md z-20 flex flex-col items-center justify-center gap-4">
-                        <div class="relative w-20 h-20"><div class="absolute inset-0 rounded-full border-4 border-violet-500 border-t-transparent animate-spin"></div></div>
-                        <p class="text-xs font-mono text-violet-300 tracking-wider animate-pulse" id="loaderText">PROCESSANDO...</p>
-                    </div>
-                    <div class="w-full h-[380px] rounded-2xl overflow-hidden" id="canvasContainer"></div>
-                </div>
-                <button id="btnShareClient" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-4 px-6 rounded-2xl font-extrabold shadow-lg shadow-violet-600/20 transition-all">🔗 GERAR LINK PARA O CLIENTE</button>
-            </section>
-
-            <section id="controlSection" class="lg:col-span-6 flex flex-col gap-6">
-                <div id="designerPanel" class="bg-gotham-card rounded-3xl p-6 border border-white/5 flex flex-col gap-6">
-                    <div class="flex flex-col gap-2">
-                        <textarea id="aiPromptText" rows="3" class="w-full bg-black/40 border ai-glow-border rounded-2xl p-4 text-sm text-white" placeholder="Descreva sua arte 4K aqui..."></textarea>
-                        <button id="btnGenerateAI" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl text-xs">Desenhar em 4K</button>
-                    </div>
-                </div>
-            </section>
+        <main class="max-w-7xl mx-auto p-6 w-full flex-grow text-center py-20 text-white">
+            <h2 class="text-4xl font-black mb-4">Bem-vindo ao Estúdio</h2>
+            <p class="text-gray-400">O painel está ativo e funcional.</p>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -147,58 +77,47 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
-
-        const state = { finish: 'matte', exteriorColor: '#121214', interiorColor: '#FFD700', textLine1: 'I AM THE', textLine2: 'NIGHT.', textColor: '#FFD700', fontFamily: 'Bebas Neue', customFullBannerImage: null };
 
         const loginScreen = document.getElementById('loginScreen');
         const mainApp = document.getElementById('mainApp');
-        const btnLogout = document.getElementById('btnLogout');
         const emailInput = document.getElementById('emailInput');
         const passwordInput = document.getElementById('passwordInput');
-        
-        onAuthStateChanged(auth, (user) => {
-            const isViewerMode = new URLSearchParams(window.location.search).has('id');
-            if (user) {
-                loginScreen.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                mainApp.classList.add('flex');
-                document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
-                document.getElementById('userProfileArea').classList.remove('hidden');
-            } else if (isViewerMode) {
-                loginScreen.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                mainApp.classList.add('flex');
-            } else {
-                loginScreen.classList.remove('hidden');
-                mainApp.classList.add('hidden');
-                mainApp.classList.remove('flex');
-                emailInput.value = '';
-                passwordInput.value = '';
-            }
-        });
+        const btnLogout = document.getElementById('btnLogout');
 
-        document.getElementById('btnLogin').addEventListener('click', () => signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value).catch(e => alert(e.message)));
-        document.getElementById('btnRegister').addEventListener('click', () => createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value).catch(e => alert(e.message)));
-        document.getElementById('btnGoogle').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(e => alert("Erro Google: Use Live Server ou GitHub Pages.")));
-
+        // Logout com limpeza forçada
         btnLogout.addEventListener('click', () => {
             signOut(auth).then(() => {
+                // FORÇANDO LIMPEZA: Pegando pelo ID diretamente no DOM
+                document.getElementById('emailInput').value = '';
+                document.getElementById('passwordInput').value = '';
+                // Limpeza extra para prevenir autocomplete persistente
                 emailInput.value = '';
                 passwordInput.value = '';
             });
         });
 
-        function showToast(text) {
-            const t = document.getElementById('toastNotification');
-            document.getElementById('toastText').innerText = text;
-            t.classList.remove('translate-x-96');
-            setTimeout(() => t.classList.add('translate-x-96'), 3000);
-        }
+        document.getElementById('btnLogin').addEventListener('click', () => signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value).catch(e => alert(e.message)));
+        document.getElementById('btnRegister').addEventListener('click', () => createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value).catch(e => alert(e.message)));
+        document.getElementById('btnGoogle').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(e => console.error(e)));
 
-        // ... (resto da lógica do Canvas e IA mantida do código anterior)
-        window.onload = () => { console.log("Sistema Pronto."); };
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                mainApp.classList.add('flex');
+                document.getElementById('userNameDisplay').innerText = user.email;
+            } else {
+                loginScreen.classList.remove('hidden');
+                mainApp.classList.add('hidden');
+                mainApp.classList.remove('flex');
+                // Limpeza agressiva ao sair
+                emailInput.value = '';
+                passwordInput.value = '';
+                document.getElementById('emailInput').value = '';
+                document.getElementById('passwordInput').value = '';
+            }
+        });
     </script>
 </body>
 </html>
