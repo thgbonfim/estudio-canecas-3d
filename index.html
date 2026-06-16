@@ -569,6 +569,7 @@
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+        
        const firebaseConfig = {
             apiKey: "AIzaSyCJyVEblu0ELGgvhos4B5XdICF_I5nmrVE",
             authDomain: "mugstudio-704f2.firebaseapp.com",
@@ -583,6 +584,7 @@
             measurementId: "G-P1FSLP846L"
 
         };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -885,8 +887,8 @@
             canvasTexture.wrapS = THREE.RepeatWrapping;
             canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
 
-            canvasTexture.repeat.set(1, 1);
-            canvasTexture.offset.set(0.5, 0);
+            canvasTexture.repeat.set(-1, 1);
+            canvasTexture.offset.set(0.75, 0);
 
             mugGroup = new THREE.Group();
             scene.add(mugGroup);
