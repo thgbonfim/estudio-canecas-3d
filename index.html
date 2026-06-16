@@ -423,14 +423,13 @@
         import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         // 1. Configuração do Firebase
-      const firebaseConfig = {
-            apiKey: "AIzaSyDj7fEJUxeJydEvheKcatILaJftdXczfNM",
-            authDomain: "canecas-studio.firebaseapp.com",
-            projectId: "canecas-studio",
-            storageBucket: "canecas-studio.firebasestorage.app",
-            messagingSenderId: "330449874900",
-            appId: "1:330449874900:web:cfd145e7a4722ac7a7f041",
-            measurementId: "G-REZJJ4BEYC"
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkCNidkLchtEnaL2COYQ2x8NwpKivFM_M",
+            authDomain: "sdutio-canecas.firebaseapp.com",
+            projectId: "sdutio-canecas",
+            storageBucket: "sdutio-canecas.appspot.com",
+            messagingSenderId: "556904542035",
+            appId: "1:556904542035:web:56a248ed65ec3c5d37bba6"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -697,8 +696,11 @@
             canvasTexture = new THREE.CanvasTexture(bannerCanvas);
             canvasTexture.wrapS = THREE.RepeatWrapping;
             canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
-            canvasTexture.repeat.set(-1, 1);
-            canvasTexture.offset.set(0.75, 0);
+            
+            // CORREÇÃO: O valor estava -1 (o que criava o efeito de espelho). Mudamos para 1.
+            canvasTexture.repeat.set(1, 1);
+            // CORREÇÃO: Ajuste do offset para que o espaço em branco da arte fique certinho na alça
+            canvasTexture.offset.set(0.25, 0);
 
             mugGroup = new THREE.Group();
             scene.add(mugGroup);
