@@ -1,56 +1,456 @@
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
-    <!-- STREAMING_CHUNK:Configurando assets... -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estúdio de Design Inteligente - Canecas 3D & Agente IA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght=0,300;0,500;0,700;1,900&family=Cinzel:wght=700&family=Permanent+Marker&family=Fira+Code:wght=400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gotham: {
+                            dark: '#0B0C10',
+                            card: '#151B24',
+                            yellow: '#FFD700',
+                            accent: '#4E9F3D',
+                            ai: '#8B5CF6',
+                            light: '#C5C6C7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
-        body { background-color: #0B0C10; font-family: 'Montserrat', sans-serif; color: #C5C6C7; }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #111; } ::-webkit-scrollbar-thumb { background: #8B5CF6; border-radius: 3px; }
+        body {
+            background-color: #0B0C10;
+            font-family: 'Montserrat', sans-serif;
+            color: #C5C6C7;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8B5CF6;
+            border-radius: 3px;
+        }
+        .ai-glow {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
+        }
+        .ai-glow-border {
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+        .ai-glow-border:focus {
+            border-color: rgba(139, 92, 246, 0.9);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        }
+        .typing::after {
+            content: '|';
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
     </style>
 </head>
-<body class="min-h-screen bg-[#0B0C10]">
+<body class="overflow-x-hidden">
 
-    <!-- LOGIN SCREEN -->
-    <div id="loginScreen" class="fixed inset-0 z-[100] bg-[#0B0C10] flex items-center justify-center p-4">
-        <div class="bg-[#151B24] w-full max-w-md rounded-3xl border border-violet-500/30 p-8 flex flex-col gap-6 shadow-2xl">
-            <h1 class="text-2xl font-black text-white text-center tracking-widest">MUGSTUDIO <span class="text-violet-400">IA</span></h1>
-            <input type="email" id="emailInput" autocomplete="off" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white" placeholder="Email Profissional">
-            <input type="password" id="passwordInput" autocomplete="new-password" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white" placeholder="Senha">
-            <button id="btnLogin" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl text-sm">Entrar</button>
-            <button id="btnGoogle" class="w-full bg-white text-gray-900 font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2">Continuar com o Google</button>
+    <!-- TELA DE LOGIN EM ECRÃ INTEIRO (BLOQUEIA O SITE) -->
+    <div id="loginScreen" class="fixed inset-0 z-[100] bg-[#0B0C10] flex flex-col items-center justify-center p-4 transition-all">
+        <!-- Partículas decorativas de fundo -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-600 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600 rounded-full blur-[120px]"></div>
+        </div>
+
+        <div class="bg-[#151B24] w-full max-w-md rounded-3xl border border-violet-500/30 shadow-2xl shadow-violet-900/40 p-8 flex flex-col gap-6 relative z-10">
+            
+            <div class="text-center mt-2 flex flex-col items-center">
+                <div class="bg-gradient-to-r from-violet-600 to-indigo-600 p-3 rounded-2xl text-white text-2xl font-extrabold flex items-center justify-center shadow-lg shadow-violet-500/20 mb-4 w-14 h-14">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h2 class="text-2xl font-black text-white tracking-widest">MUGSTUDIO IA</h2>
+                <p class="text-xs text-violet-400 font-bold mt-1.5 uppercase tracking-widest">Acesso Restrito a Designers</p>
+                <p class="text-xs text-gray-400 mt-3 px-4">Por favor, faça login para aceder à plataforma e gerir os seus projetos 3D.</p>
+            </div>
+
+            <!-- Botão Google -->
+            <button id="btnGoogleLogin" class="w-full bg-white hover:bg-gray-200 text-gray-900 py-3.5 px-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all shadow-lg">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                Continuar com o Google
+            </button>
+
+            <div class="flex items-center gap-3 text-[10px] text-gray-500 font-mono tracking-widest uppercase">
+                <div class="flex-1 h-px bg-white/10"></div>
+                OU COM EMAIL
+                <div class="flex-1 h-px bg-white/10"></div>
+            </div>
+
+            <div class="flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-medium mb-1.5 text-gotham-light">SEU EMAIL:</label>
+                    <input type="email" id="authEmail" class="w-full bg-[#0F1016] border border-white/10 text-white rounded-xl p-3.5 text-sm focus:outline-none focus:border-violet-500 transition-all" placeholder="exemplo@email.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1.5 text-gotham-light">SUA SENHA:</label>
+                    <input type="password" id="authPassword" class="w-full bg-[#0F1016] border border-white/10 text-white rounded-xl p-3.5 text-sm focus:outline-none focus:border-violet-500 transition-all" placeholder="••••••••">
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-2">
+                <button id="btnEmailLogin" class="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-3.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-violet-600/20">
+                    Entrar
+                </button>
+                <button id="btnEmailSignup" class="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/20 py-3.5 rounded-xl text-sm font-bold transition-all">
+                    Criar Conta
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN APP -->
-    <div id="mainApp" class="hidden flex-col min-h-screen">
+    <!-- ESTÚDIO PRINCIPAL (OCULTO ATÉ FAZER LOGIN) -->
+    <div id="mainApp" class="hidden min-h-screen flex-col justify-between">
+        
         <header class="border-b border-white/5 bg-black/85 backdrop-blur-md px-6 py-4 sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto flex justify-between items-center text-white">
-                <h1 class="font-bold">MUGSTUDIO <span class="text-violet-400">GEN-IA</span></h1>
-                <button id="btnLogout" class="text-xs bg-red-900/20 text-red-400 px-3 py-1 rounded-full border border-red-900">Sair</button>
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                <span id="designerStatusBadge" class="text-xs text-violet-300 bg-violet-950/40 px-3.5 py-1.5 rounded-full border border-violet-800/30 font-mono flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-violet-400 animate-ping"></span> Agente "Corel-Bot 3.0" Ativo
+                </span>
+                <span id="clientStatusBadge" class="hidden text-xs text-emerald-300 bg-emerald-950/40 px-3.5 py-1.5 rounded-full border border-emerald-800/30 font-mono flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Modo de Aprovação de Projeto
+                </span>
+                
+                <!-- PERFIL DO USUÁRIO LOGADO -->
+                <div id="userProfileArea" class="hidden items-center gap-3 bg-black/50 border border-white/10 px-3 py-1.5 rounded-xl ml-2">
+                    <span id="userNameDisplay" class="text-xs text-gray-300 font-bold tracking-wider"></span>
+                    <button id="btnLogout" class="text-[10px] text-red-400 hover:text-red-300 font-bold bg-red-500/10 px-2 py-1 rounded transition-all">Sair</button>
+                </div>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <main class="max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div id="canvasContainer" class="w-full h-[500px] bg-black/50 rounded-3xl border border-white/10 shadow-xl overflow-hidden"></div>
-            <div class="flex flex-col gap-6 text-white">
-                <textarea id="aiPrompt" rows="3" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white" placeholder="Descreva a arte..."></textarea>
-                <button id="btnGenerate" class="bg-violet-600 hover:bg-violet-700 text-white py-4 rounded-xl font-bold">Gerar Arte 3D</button>
-            </div>
+    <div id="toastNotification" class="fixed top-20 right-6 z-50 transform translate-x-96 transition-all duration-300 bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-2xl shadow-2xl flex items-center gap-2 border border-emerald-400">
+            <i class="fa-solid fa-circle-check text-lg animate-bounce"></i>
+            <span id="toastText">Link copiado com sucesso!</span>
+        </div>
+
+        <main class="max-w-7xl mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 w-full flex-grow">
+            
+            <section id="previewSection" class="lg:col-span-6 flex flex-col gap-6 transition-all duration-500">
+                
+                <div class="relative bg-gradient-to-b from-[#14121F] to-[#0A0811] rounded-3xl border border-violet-950/20 shadow-2xl overflow-hidden group flex flex-col justify-between p-6" style="height: 520px;">
+                    
+                    <div class="absolute top-4 left-4 z-10 flex flex-col gap-1.5 pointer-events-none">
+                        <span class="bg-black/70 backdrop-blur-md text-violet-300 text-xs font-bold font-mono px-3 py-1.5 rounded-full border border-violet-500/30 flex items-center gap-2 w-fit">
+                            <span class="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse"></span> MOTOR 3D REALISTA (PBR)
+                        </span>
+                        <span class="bg-black/70 backdrop-blur-md text-white text-[10px] font-mono px-3 py-1 rounded-full border border-white/10 w-fit">
+                            <i class="fa-solid fa-hand-pointer text-violet-400 mr-1"></i> Arraste para orbitar / Zoom scroll
+                        </span>
+                    </div>
+
+                    <div class="absolute top-4 right-4 z-10 flex gap-2">
+                        <button id="btnAutoRotate" class="p-2.5 bg-black/50 hover:bg-violet-600 rounded-full border border-white/10 text-white transition-all" title="Auto Rotação">
+                            <i class="fa-solid fa-arrows-spin text-sm"></i>
+                        </button>
+                        <button id="btnResetAngle" class="p-2.5 bg-black/50 hover:bg-violet-600 rounded-full border border-white/10 text-white transition-all" title="Resetar Câmera">
+                            <i class="fa-solid fa-camera-rotate text-sm"></i>
+                        </button>
+                    </div>
+
+                    <div id="canvasLoader" class="hidden absolute inset-0 bg-black/80 backdrop-blur-md z-20 flex flex-col items-center justify-center gap-4 transition-all">
+                        <div class="relative w-20 h-20">
+                            <div class="absolute inset-0 rounded-full border-4 border-violet-950/40"></div>
+                            <div class="absolute inset-0 rounded-full border-4 border-t-violet-500 border-r-violet-500 animate-spin"></div>
+                        </div>
+                        <p class="text-xs font-mono text-violet-300 tracking-wider animate-pulse" id="loaderText">A CONSTRUIR A ARTE DE SUBLIMAÇÃO...</p>
+                    </div>
+
+                    <div class="w-full h-[380px] rounded-2xl overflow-hidden" id="canvasContainer"></div>
+
+                    <div class="bg-black/60 backdrop-blur-md rounded-2xl p-3 border border-white/5 flex items-center justify-between gap-3">
+                        <span class="text-xs font-mono text-gray-400">ACABAMENTO DE ARTE:</span>
+                        <div class="flex gap-1.5">
+                            <button id="btnFinishMatte" class="py-1 px-3 rounded-lg border border-violet-500/50 text-violet-300 bg-violet-500/10 font-bold text-[11px] transition-all">
+                                Fosco Premium
+                            </button>
+                            <button id="btnFinishGlossy" class="py-1 px-3 rounded-lg border border-white/10 text-white bg-transparent hover:border-white/20 font-bold text-[11px] transition-all">
+                                Brilhante (Esmaltado)
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button id="btnDownloadMockup" class="bg-gotham-card hover:bg-gotham-card/80 text-white py-3.5 px-6 rounded-2xl border border-white/15 transition-all font-bold flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-camera text-violet-400"></i> Tirar Foto (PNG)
+                        </button>
+                        <button id="btnDownloadBanner" class="bg-gotham-card hover:bg-gotham-card/80 text-white py-3.5 px-6 rounded-2xl border border-white/15 transition-all font-bold flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-download text-indigo-400"></i> Baixar Arte Planificada (205x92mm)
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <button id="btnShareClient" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-4 px-6 rounded-2xl shadow-lg shadow-violet-600/20 transition-all font-extrabold flex items-center justify-center gap-2.5 text-base border border-violet-400/20">
+                            <i class="fa-solid fa-share-nodes text-xl animate-pulse"></i> 🔗 COPIAR LINK CURTO DO CLIENTE
+                        </button>
+                    </div>
+                    <button id="btnClearAllArt" class="w-full bg-red-950/20 hover:bg-red-900/30 text-red-300 py-3 px-6 rounded-2xl border border-red-900/30 hover:border-red-500/50 transition-all font-bold flex items-center justify-center gap-2 text-xs shadow-lg shadow-red-950/10">
+                        <i class="fa-solid fa-trash-can text-red-400"></i> Remover Toda a Arte (Resetar Caneca)
+                    </button>
+                </div>
+
+            </section>
+
+            <section id="controlSection" class="lg:col-span-6 flex flex-col gap-6 transition-all duration-500">
+                
+                <div id="designerPanel" class="bg-gotham-card rounded-3xl p-6 border border-white/5 shadow-2xl flex flex-col gap-6 transition-all">
+                    
+                    <div class="flex border-b border-white/10 pb-4">
+                        <button id="tabAI" class="flex-1 py-2 text-center font-bold text-sm text-violet-400 border-b-2 border-violet-500 transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> AGENTE DESIGNER GERATIVO (IA)
+                        </button>
+                        <button id="tabManual" class="flex-1 py-2 text-center font-bold text-sm text-gray-500 hover:text-white transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-sliders"></i> CONFIGURAR MANUAL
+                        </button>
+                    </div>
+
+                    <div id="panelAI" class="flex flex-col gap-5">
+                        
+                        <div class="bg-violet-950/20 rounded-2xl p-4 border border-violet-950/50 flex gap-3">
+                            <div class="text-violet-400 text-2xl pt-1">
+                                <i class="fa-solid fa-cloud"></i>
+                            </div>
+                            <div class="text-xs leading-relaxed text-gray-300">
+                                <strong class="text-white block mb-1">Integração Firestore Ativa:</strong>
+                                Agora todas as imagens que enviares são guardadas diretamente na nuvem de forma segura. Adeus links longos e erros 414!
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label class="text-xs font-mono text-gray-400 flex justify-between">
+                                <span>INSIRA O SEU DESEJO CRIATIVO:</span>
+                                <span class="text-violet-400 font-bold">PROMPT NEURAL</span>
+                            </label>
+                            <div class="relative">
+                                <textarea id="aiPromptText" rows="3" class="w-full bg-black/40 border ai-glow-border rounded-2xl p-4 text-sm text-white focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all placeholder-gray-600 font-medium" placeholder="Ex: Fotografia ultra realista do Neymar jogando futebol no meio de uma tempestade, resolução 8K..."></textarea>
+                                <button id="btnGenerateAI" class="absolute bottom-4 right-4 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-violet-600/30 transition-all flex items-center gap-1.5">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Desenhar Arte
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Ideias Rápidas para o Mostruário:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all">
+                                    ⚽ Neymar na chuva em 4K
+                                </button>
+                                <button class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all">
+                                    🏎️ Ferrari vermelha na cidade neon
+                                </button>
+                                <button class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all">
+                                    🎸 Rockstar num show grandioso
+                                </button>
+                                <button class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all">
+                                    🦸‍♂️ Herói voando pelo espaço
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="aiConsoleBox" class="bg-black/60 border border-violet-950/40 rounded-2xl p-4 font-mono text-xs flex flex-col gap-2 min-h-[140px] justify-between">
+                            <div class="flex justify-between items-center text-gray-500 border-b border-white/5 pb-1.5">
+                                <span><i class="fa-solid fa-brain"></i> PROCESSADOR NEURAL FLUX 4K:</span>
+                                <span id="aiStatusBadge" class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Pronto para criar</span>
+                            </div>
+                            <div id="aiThoughtLog" class="text-violet-300/95 leading-relaxed overflow-y-auto max-h-[100px]">
+                                "Olá! O motor fotorealista está ativado. Sistema de enquadramento (sem achatar) e nuvem configurados!"
+                            </div>
+                            <div class="text-[10px] text-gray-600 border-t border-white/5 pt-1 flex justify-between">
+                                <span>Resolução Real: 205mm x 92mm</span>
+                                <span>Proporção de Corte: Automática</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="panelManual" class="hidden flex flex-col gap-5">
+                        
+                        <div class="bg-gradient-to-r from-violet-600/10 to-indigo-600/10 rounded-2xl p-4 border border-violet-500/30 flex flex-col gap-3">
+                            <span class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-up text-sm"></i> ENVIAR ARTE COMPLETA (GABARITO 205x92mm)
+                            </span>
+                            <input type="file" id="inputFullBanner" accept="image/*" class="w-full text-xs text-gotham-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-500 bg-transparent cursor-pointer">
+                            <div class="flex items-center justify-between gap-2 mt-1">
+                                <div id="uploadBannerFeedback" class="hidden text-[10px] text-green-400 font-mono"><i class="fa-solid fa-circle-check"></i> Arte de sublimação aplicada!</div>
+                                <button id="btnResetFullBanner" class="text-[10px] text-red-400 hover:text-red-300 font-mono flex items-center gap-1 transition-all ml-auto">
+                                    <i class="fa-solid fa-trash-can"></i> Limpar / Voltar ao Editor
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 bg-black/30 p-4 rounded-2xl border border-white/5">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-gotham-light">PORCELANA (FORA):</label>
+                                <div class="flex items-center gap-2 bg-gotham-card rounded-xl p-2 border border-white/10">
+                                    <input type="color" id="colorExterior" value="#121214" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0">
+                                    <span id="hexExterior" class="text-xs font-mono text-white">#121214</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-gotham-light">INTERIOR / ALÇA:</label>
+                                <div class="flex items-center gap-2 bg-gotham-card rounded-xl p-2 border border-white/10">
+                                    <input type="color" id="colorInterior" value="#FFD700" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0">
+                                    <span id="hexInterior" class="text-xs font-mono text-white">#FFD700</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex flex-col gap-4">
+                            <span class="text-xs font-mono tracking-wider font-bold text-violet-400">LADO A: LOGOTIPO OU IMAGEM</span>
+                            
+                            <div class="p-3 bg-black/40 rounded-xl border border-white/10">
+                                <label class="block text-xs font-medium mb-1.5 text-violet-300"><i class="fa-solid fa-upload"></i> CARREGAR LOGO/PNG:</label>
+                                <input type="file" id="inputCustomLogo" accept="image/*" class="w-full text-xs text-gotham-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-500 bg-transparent cursor-pointer">
+                                <div id="uploadFeedback" class="hidden mt-2 text-[10px] text-green-400 font-mono"><i class="fa-solid fa-circle-check"></i> Logo carregado!</div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1.5 text-gotham-light">COR DO LOGO:</label>
+                                    <input type="color" id="colorLogo" value="#000000" class="w-full h-10 rounded-xl cursor-pointer bg-gotham-card border border-white/10 p-1">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1.5 text-gotham-light">ESCALA DO LOGO:</label>
+                                    <input type="range" id="sliderLogoScale" min="60" max="140" value="100" class="w-full accent-violet-500 h-2 mt-4 bg-gray-700 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex flex-col gap-4">
+                            <span class="text-xs font-mono tracking-wider font-bold text-violet-400">LADO B: FRASE PERSONALIZADA</span>
+                            
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-gotham-light">TEXTO DO VERSO (LINHA 1):</label>
+                                <input type="text" id="inputTextL1" value="I AM THE" class="w-full bg-gotham-card border border-white/10 text-white rounded-xl p-3 text-sm focus:outline-none focus:border-violet-500 font-mono uppercase">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-gotham-light">TEXTO DO VERSO (LINHA 2 - DESTAQUE):</label>
+                                <input type="text" id="inputTextL2" value="NIGHT." class="w-full bg-gotham-card border border-white/10 text-white rounded-xl p-3 text-sm focus:outline-none focus:border-violet-500 font-mono uppercase">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium mb-2 text-gotham-light">FONTE:</label>
+                                    <select id="selectFont" class="w-full bg-gotham-card border border-white/10 text-white rounded-xl p-2.5 text-sm focus:outline-none focus:border-violet-500">
+                                        <option value="Bebas Neue">Bebas Neue</option>
+                                        <option value="Montserrat">Montserrat</option>
+                                        <option value="Cinzel">Cinzel</option>
+                                        <option value="Permanent Marker">Marker</option>
+                                        <option value="Fira Code">Fira Code</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1.5 text-gotham-light">COR DO TEXTO:</label>
+                                    <input type="color" id="colorText" value="#FFD700" class="w-full h-10 rounded-xl cursor-pointer bg-gotham-card border border-white/10 p-1">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div id="clientPanel" class="hidden bg-[#0F1016] rounded-3xl p-6 border-2 border-emerald-500/30 shadow-2xl flex flex-col gap-6 animate-pulse">
+                    
+                    <div class="flex flex-col gap-2 text-center border-b border-white/10 pb-4">
+                        <span class="text-[10px] font-mono tracking-widest text-emerald-400 font-extrabold uppercase">Apresentação de Produto Exclusiva</span>
+                        <h2 class="text-2xl font-black text-white tracking-wide">AVALIAÇÃO DO PROJETO 3D</h2>
+                        <p class="text-xs text-gotham-light/70">Gira a caneca em 3D e altera o acabamento para conferir a estampa oficial de 205x92mm.</p>
+                    </div>
+
+                    <div class="bg-emerald-950/20 border border-emerald-500/30 rounded-2xl p-4 flex gap-3">
+                        <div class="text-emerald-400 text-2xl pt-1">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                        </div>
+                        <div class="text-xs leading-relaxed text-emerald-300">
+                            <strong class="text-white block mb-1">Como funciona a aprovação?</strong>
+                            Se estiveres satisfeito com o design, clica em **Aprovar Projeto** para confirmar. Se quiseres alterar cores, textos ou imagens, usa o botão **Solicitar Ajustes**.
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-4">
+                        <button id="btnApproveDesign" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white py-4 px-6 rounded-2xl shadow-xl shadow-emerald-950/40 transition-all font-black text-lg flex items-center justify-center gap-2.5 border border-emerald-400/30">
+                            <i class="fa-solid fa-circle-check text-xl"></i> APROVAR PROJETO COMPLETO
+                        </button>
+                        
+                        <button id="btnRequestChanges" class="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-300 py-4 px-6 rounded-2xl border border-white/10 transition-all font-bold flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-pen-to-square"></i> Solicitar Ajustes / Alterações
+                        </button>
+                    </div>
+
+                    <div id="feedbackTextContainer" class="hidden flex flex-col gap-3 p-4 bg-black/40 rounded-2xl border border-white/5">
+                        <label class="text-xs font-mono text-gray-400 uppercase tracking-wider block">O que gostarias de ajustar na arte?</label>
+                        <textarea id="feedbackText" rows="3" class="w-full bg-[#12131C] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-violet-500 transition-all font-medium" placeholder="Ex: Mudar a cor de fundo para azul-marinho..."></textarea>
+                        <button id="btnCopyFeedback" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 ml-auto transition-all">
+                            <i class="fa-brands fa-whatsapp text-lg"></i> Enviar Alterações no WhatsApp
+                        </button>
+                    </div>
+
+                    <button id="btnExitViewer" class="text-center text-[10px] text-gray-600 hover:text-white transition-all underline font-mono mt-2">
+                        <i class="fa-solid fa-lock-open mr-1"></i> Voltar ao Painel do Designer
+                    </button>
+
+                </div>
+
+            </section>
+
         </main>
+
+        <section id="bannerSection" class="max-w-7xl mx-auto p-4 lg:p-6 w-full">
+            <div class="bg-black/70 rounded-3xl p-6 border border-white/5 flex flex-col gap-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-map text-violet-400"></i> BANNER DE IMPRESSÃO (GABARITO 205x92mm)
+                        </h3>
+                        <p class="text-xs text-gotham-light/70">Este é o ficheiro de impressão. O vão branco traseiro encaixa exatamente na alça da caneca física.</p>
+                    </div>
+                    <span class="text-xs bg-violet-500/15 border border-violet-500/30 text-violet-400 px-3 py-1 rounded font-mono font-bold">
+                        Gabarito Oficial: 1025px × 460px (205:92)
+                    </span>
+                </div>
+                
+                <div class="w-full overflow-x-auto flex justify-center bg-zinc-950 p-4 rounded-2xl border border-white/10">
+                    <canvas id="bannerCanvas" width="1025" height="460" class="max-w-full rounded border border-dashed border-gray-600 bg-black"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <footer class="border-t border-gotham-card bg-black/90 py-6 px-4 text-center text-xs text-gotham-light/40 font-mono mt-12">
+        <p>© 2026 MugStudio IA. Estúdio de Sublimação de Canecas com Gabarito Técnico Homologado.</p>
+    </footer>
     </div>
 
-    <!-- STREAMING_CHUNK:Lógica unificada de Login, IA e 3D... -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDkCNidkLchtEnaL2COYQ2x8NwpKivFM_M",
@@ -61,72 +461,1004 @@
             appId: "1:556904542035:web:56a248ed65ec3c5d37bba6"
         };
 
-        const auth = getAuth(initializeApp(firebaseConfig));
-        const provider = new GoogleAuthProvider();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        console.log("🔥 Firebase conectado com sucesso!");
+
+        const state = {
+            theme: 'batman',        
+            customLogoImage: null,  
+            customLogoName: null,      
+            customFullBannerImage: null, 
+            customFullBannerName: null,  
+            finish: 'matte',        
+            exteriorColor: '#121214',
+            interiorColor: '#FFD700',
+            logoStyle: 'classic',   
+            logoColor: '#000000',
+            logoScale: 100,         
+            textLine1: 'I AM THE',
+            textLine2: 'NIGHT.',
+            textColor: '#FFD700',
+            fontFamily: 'Bebas Neue',
+            bgStyle: 'tech-grid',
+            isAutoRotating: false,
+            aiVectorShape: 'batman-sigil' 
+        };
+
+        const bannerCanvas = document.getElementById('bannerCanvas');
+        const bannerCtx = bannerCanvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const canvasLoader = document.getElementById('canvasLoader');
+        const loaderText = document.getElementById('loaderText');
+        
+        const colorExterior = document.getElementById('colorExterior');
+        const hexExterior = document.getElementById('hexExterior');
+        const colorInterior = document.getElementById('colorInterior');
+        const hexInterior = document.getElementById('hexInterior');
+        const colorLogo = document.getElementById('colorLogo');
+        const sliderLogoScale = document.getElementById('sliderLogoScale');
+        const inputTextL1 = document.getElementById('inputTextL1');
+        const inputTextL2 = document.getElementById('inputTextL2');
+        const selectFont = document.getElementById('selectFont');
+        const colorText = document.getElementById('colorText');
+
+        const tabAI = document.getElementById('tabAI');
+        const tabManual = document.getElementById('tabManual');
+        const panelAI = document.getElementById('panelAI');
+        const panelManual = document.getElementById('panelManual');
+        const btnGenerateAI = document.getElementById('btnGenerateAI');
+        const aiPromptText = document.getElementById('aiPromptText');
+        const aiThoughtLog = document.getElementById('aiThoughtLog');
+        const aiStatusBadge = document.getElementById('aiStatusBadge');
+
+        const inputCustomLogo = document.getElementById('inputCustomLogo');
+        const uploadFeedback = document.getElementById('uploadFeedback');
+        const inputFullBanner = document.getElementById('inputFullBanner');
+        const btnResetFullBanner = document.getElementById('btnResetFullBanner');
+        const uploadBannerFeedback = document.getElementById('uploadBannerFeedback');
+
+        const btnFinishMatte = document.getElementById('btnFinishMatte');
+        const btnFinishGlossy = document.getElementById('btnFinishGlossy');
+        const btnAutoRotate = document.getElementById('btnAutoRotate');
+        const btnResetAngle = document.getElementById('btnResetAngle');
+        const btnDownloadMockup = document.getElementById('btnDownloadMockup');
+        const btnDownloadBanner = document.getElementById('btnDownloadBanner');
+        const btnClearAllArt = document.getElementById('btnClearAllArt');
+
+        const btnShareClient = document.getElementById('btnShareClient');
+        const designerPanel = document.getElementById('designerPanel');
+        const clientPanel = document.getElementById('clientPanel');
+        const designerStatusBadge = document.getElementById('designerStatusBadge');
+        const clientStatusBadge = document.getElementById('clientStatusBadge');
+        const btnApproveDesign = document.getElementById('btnApproveDesign');
+        const btnRequestChanges = document.getElementById('btnRequestChanges');
+        const feedbackTextContainer = document.getElementById('feedbackTextContainer');
+        const feedbackText = document.getElementById('feedbackText');
+        const btnCopyFeedback = document.getElementById('btnCopyFeedback');
+        const btnExitViewer = document.getElementById('btnExitViewer');
+        const bannerSection = document.getElementById('bannerSection');
+        const toastNotification = document.getElementById('toastNotification');
+        const toastText = document.getElementById('toastText');
+
+        // ELEMENTOS DE LOGIN
         const loginScreen = document.getElementById('loginScreen');
         const mainApp = document.getElementById('mainApp');
-        
-        let scene, camera, renderer, mugGroup;
+        const userProfileArea = document.getElementById('userProfileArea');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const btnLogout = document.getElementById('btnLogout');
+        const btnGoogleLogin = document.getElementById('btnGoogleLogin');
+        const btnEmailLogin = document.getElementById('btnEmailLogin');
+        const btnEmailSignup = document.getElementById('btnEmailSignup');
+        const authEmail = document.getElementById('authEmail');
+        const authPassword = document.getElementById('authPassword');
 
-        // Limpeza anti-autofill
-        function forceClearInputs() {
-            document.getElementById('emailInput').value = '';
-            document.getElementById('passwordInput').value = '';
+        let scene, camera, renderer, orbitControls;
+        let mugGroup; 
+        let mugOuterMesh, mugInnerMesh, mugRimMesh, mugBottomCapMesh, mugInnerFloorMesh, mugHandleMesh;
+        let canvasTexture; 
+
+        // --- SISTEMA INTELIGENTE DE CORTES (Object-Fit) ---
+        function drawFlatBanner() {
+            const w = bannerCanvas.width;
+            const h = bannerCanvas.height;
+            
+            bannerCtx.clearRect(0, 0, w, h);
+            bannerCtx.fillStyle = '#FFFFFF';
+            bannerCtx.fillRect(0, 0, w, h);
+
+            const marginX = w * 0.08; 
+            const printW = w - (marginX * 2);
+
+            if (state.customFullBannerImage) {
+                const img = state.customFullBannerImage;
+                
+                const canvasRatio = printW / h;
+                const imgRatio = img.width / img.height;
+                
+                let drawW = printW;
+                let drawH = h;
+                let offsetX = 0;
+                let offsetY = 0;
+
+                if (imgRatio > canvasRatio) {
+                    drawW = h * imgRatio;
+                    offsetX = (drawW - printW) / 2;
+                } else {
+                    drawH = printW / imgRatio;
+                    offsetY = (drawH - h) / 2;
+                }
+
+                bannerCtx.save();
+                bannerCtx.beginPath();
+                bannerCtx.rect(marginX, 0, printW, h);
+                bannerCtx.clip();
+                
+                bannerCtx.drawImage(img, marginX - offsetX, -offsetY, drawW, drawH);
+                
+                bannerCtx.restore();
+            } else {
+                bannerCtx.fillStyle = state.exteriorColor;
+                bannerCtx.fillRect(marginX, 0, printW, h);
+
+                const cxA = marginX + (printW * 0.75);
+                const cxB = marginX + (printW * 0.25);
+
+                if (state.aiVectorShape !== 'none') {
+                    drawAIVector(bannerCtx, cxA, h * 0.5, state.logoScale, state.aiVectorShape, state.logoColor, state.interiorColor);
+                }
+
+                if (state.textLine1 || state.textLine2) {
+                    drawBannerText(bannerCtx, cxB, h * 0.5);
+                }
+            }
+
+            if (canvasTexture) canvasTexture.needsUpdate = true;
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                loginScreen.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                mainApp.classList.add('flex');
-                setTimeout(initThreeJS, 500); 
-            } else {
-                loginScreen.classList.remove('hidden');
-                mainApp.classList.add('hidden');
-                mainApp.classList.remove('flex');
-                forceClearInputs();
+        function drawAIVector(ctx, cx, cy, scaleFactor, shapeType, color, highlightColor) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            
+            const scale = (scaleFactor / 100) * 2.2;
+            ctx.scale(scale, scale);
+
+            if (state.customLogoImage) {
+                const img = state.customLogoImage;
+                const maxDim = 110;
+                let iw = img.width;
+                let ih = img.height;
+                const ratio = Math.min(maxDim / iw, maxDim / ih);
+                ctx.drawImage(img, -(iw * ratio) / 2, -(ih * ratio) / 2, iw * ratio, ih * ratio);
+                ctx.restore();
+                return;
             }
-        });
 
-        document.getElementById('btnLogin').addEventListener('click', () => {
-            signInWithEmailAndPassword(auth, document.getElementById('emailInput').value, document.getElementById('passwordInput').value).catch(e => alert(e.message));
-        });
+            ctx.fillStyle = color;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
 
-        document.getElementById('btnGoogle').addEventListener('click', () => signInWithPopup(auth, provider));
-        document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
+            if (shapeType === 'batman-sigil') {
+                ctx.fillStyle = highlightColor;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 75, 42, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.moveTo(0, -18); 
+                ctx.lineTo(4, -10); 
+                ctx.lineTo(8, -17); 
+                ctx.bezierCurveTo(18, -11, 30, -13, 60, -3); 
+                ctx.bezierCurveTo(48, 10, 36, 18, 18, 10); 
+                ctx.bezierCurveTo(13, 22, 5, 21, 0, 27); 
+                ctx.bezierCurveTo(-5, 21, -13, 22, -18, 10); 
+                ctx.bezierCurveTo(-36, 18, -48, 10, -60, -3); 
+                ctx.bezierCurveTo(-30, -13, -18, -11, -8, -17); 
+                ctx.lineTo(-4, -10); 
+                ctx.closePath();
+                ctx.fill();
+            } 
+            else if (shapeType === 'terminal') {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-16, -20); ctx.lineTo(-42, 0); ctx.lineTo(-16, 20); ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(8, -28); ctx.lineTo(-8, 28); ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(16, -20); ctx.lineTo(42, 0); ctx.lineTo(16, 20); ctx.stroke();
+            } 
+
+            ctx.restore();
+        }
+
+        function drawBannerText(ctx, cx, cy) {
+            if (!state.textLine1 && !state.textLine2) return;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.textAlign = 'center';
+
+            const font = state.fontFamily;
+
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = `italic 500 28px "${font}", sans-serif`;
+            ctx.fillText(state.textLine1, 0, -10);
+
+            ctx.fillStyle = state.textColor;
+            ctx.font = `900 70px "${font}", sans-serif`;
+            ctx.fillText(state.textLine2, 0, 60);
+
+            if (state.textLine1 || state.textLine2) {
+                ctx.strokeStyle = state.textColor;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(-80, 100);
+                ctx.lineTo(80, 100);
+                ctx.stroke();
+
+                ctx.fillStyle = state.textColor;
+                ctx.beginPath();
+                ctx.arc(0, 100, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
 
         function initThreeJS() {
-            const container = document.getElementById('canvasContainer');
-            if (container.innerHTML !== "") return;
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientHeight;
+            // Evita erros se a tela estiver oculta pelo login
+            if(width === 0) return;
 
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            container.appendChild(renderer.domElement);
+
+            camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
+            camera.position.set(0, 4, 18); 
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+
+            canvasContainer.innerHTML = '';
+            canvasContainer.appendChild(renderer.domElement);
+
+            orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+            orbitControls.enableDamping = true;
+            orbitControls.dampingFactor = 0.05;
+            orbitControls.minDistance = 10;
+            orbitControls.maxDistance = 30;
+            orbitControls.maxPolarAngle = Math.PI / 2 + 0.1; 
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
+            keyLight.position.set(12, 16, 12);
+            keyLight.castShadow = true;
+            keyLight.shadow.mapSize.width = 2048;
+            keyLight.shadow.mapSize.height = 2048;
+            keyLight.shadow.bias = -0.0001;
+            scene.add(keyLight);
+
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            fillLight.position.set(-12, 6, 8);
+            scene.add(fillLight);
+
+            const rimLight = new THREE.DirectionalLight(0xffffff, 0.85);
+            rimLight.position.set(0, 12, -12);
+            scene.add(rimLight);
+
+            canvasTexture = new THREE.CanvasTexture(bannerCanvas);
+            canvasTexture.wrapS = THREE.RepeatWrapping;
+            canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
             
-            const geometry = new THREE.CylinderGeometry(1.5, 1.5, 3, 32);
-            const material = new THREE.MeshPhongMaterial({ color: 0x8b5cf6 });
-            mugGroup = new THREE.Mesh(geometry, material);
+            canvasTexture.repeat.set(-1, 1);
+            canvasTexture.offset.set(0.75, 0);
+
+            mugGroup = new THREE.Group();
             scene.add(mugGroup);
 
-            const light = new THREE.DirectionalLight(0xffffff, 1);
-            light.position.set(5, 5, 5);
-            scene.add(light);
-            scene.add(new THREE.AmbientLight(0x404040));
+            const radius = 3.5;
+            const heightMug = 8.6;
+            const hHalf = heightMug / 2;
+            const thickness = 0.24;
 
-            camera.position.z = 5;
-            new THREE.OrbitControls(camera, renderer.domElement);
-            
-            function animate() { requestAnimationFrame(animate); mugGroup.rotation.y += 0.01; renderer.render(scene, camera); }
+            const outerGeo = new THREE.CylinderGeometry(radius, radius, heightMug, 64, 1, true);
+            const outerMat = new THREE.MeshPhysicalMaterial({
+                map: canvasTexture,
+                roughness: state.finish === 'matte' ? 0.72 : 0.15,
+                metalness: 0.0,
+                clearcoat: state.finish === 'matte' ? 0.0 : 1.0,
+                clearcoatRoughness: state.finish === 'matte' ? 0.0 : 0.08,
+                side: THREE.FrontSide
+            });
+            mugOuterMesh = new THREE.Mesh(outerGeo, outerMat);
+            mugOuterMesh.castShadow = true;
+            mugOuterMesh.receiveShadow = true;
+            mugGroup.add(mugOuterMesh);
+
+            const innerGeo = new THREE.CylinderGeometry(radius - thickness, radius - thickness, heightMug - thickness, 64, 1, true);
+            const innerMat = new THREE.MeshPhysicalMaterial({
+                color: new THREE.Color(state.interiorColor),
+                roughness: 0.1,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.05,
+                side: THREE.FrontSide
+            });
+            mugInnerMesh = new THREE.Mesh(innerGeo, innerMat);
+            mugInnerMesh.position.y = thickness / 2;
+            mugGroup.add(mugInnerMesh);
+
+            const innerFloorGeo = new THREE.CylinderGeometry(radius - thickness, radius - thickness, thickness, 64, 1, false);
+            mugInnerFloorMesh = new THREE.Mesh(innerFloorGeo, innerMat);
+            mugInnerFloorMesh.position.y = -hHalf + thickness;
+            mugGroup.add(mugInnerFloorMesh);
+
+            const bottomCapGeo = new THREE.CylinderGeometry(radius - 0.01, radius - 0.01, thickness, 64, 1, false);
+            const bottomCapMat = new THREE.MeshPhysicalMaterial({
+                color: new THREE.Color('#FFFFFF'),
+                roughness: state.finish === 'matte' ? 0.72 : 0.15,
+                metalness: 0.0,
+                clearcoat: state.finish === 'matte' ? 0.0 : 1.0,
+                clearcoatRoughness: 0.08
+            });
+            mugBottomCapMesh = new THREE.Mesh(bottomCapGeo, bottomCapMat);
+            mugBottomCapMesh.position.y = -hHalf + thickness / 2;
+            mugBottomCapMesh.receiveShadow = true;
+            mugGroup.add(mugBottomCapMesh);
+
+            const rimGeo = new THREE.TorusGeometry(radius - thickness / 2, thickness / 2, 16, 64);
+            const rimMat = new THREE.MeshPhysicalMaterial({
+                color: new THREE.Color(state.interiorColor),
+                roughness: 0.1,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.05
+            });
+            mugRimMesh = new THREE.Mesh(rimGeo, rimMat);
+            mugRimMesh.rotation.x = Math.PI / 2;
+            mugRimMesh.position.y = hHalf;
+            mugGroup.add(mugRimMesh);
+
+            const handleGeo = new THREE.TorusGeometry(2.0, 0.38, 16, 64, Math.PI);
+            const handleMat = new THREE.MeshPhysicalMaterial({
+                color: new THREE.Color(state.interiorColor),
+                roughness: state.finish === 'matte' ? 0.72 : 0.15,
+                metalness: 0.0,
+                clearcoat: state.finish === 'matte' ? 0.0 : 1.0,
+                clearcoatRoughness: 0.08
+            });
+            mugHandleMesh = new THREE.Mesh(handleGeo, handleMat);
+            mugHandleMesh.position.set(-2.7, 0, 0); 
+            mugHandleMesh.rotation.z = Math.PI / 2; 
+            mugHandleMesh.castShadow = true;
+            mugGroup.add(mugHandleMesh);
+
+            const groundGeo = new THREE.PlaneGeometry(50, 50);
+            const groundMat = new THREE.ShadowMaterial({ opacity: 0.45 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -hHalf - thickness/2; 
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            window.addEventListener('resize', onWindowResize);
             animate();
         }
 
-        document.getElementById('btnGenerate').addEventListener('click', () => {
-            const prompt = document.getElementById('aiPrompt').value;
-            alert("Gerando IA: " + prompt);
-            // Aqui vai a sua lógica de IA
+        function onWindowResize() {
+            if(!camera || !renderer) return;
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientHeight;
+            if(width === 0) return;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (state.isAutoRotating && mugGroup) {
+                mugGroup.rotation.y += 0.008;
+            }
+            if(orbitControls) orbitControls.update();
+            if(renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        function update3DMaterials() {
+            if (!mugOuterMesh) return;
+
+            const isMatte = state.finish === 'matte';
+            
+            mugOuterMesh.material.roughness = isMatte ? 0.72 : 0.15;
+            mugOuterMesh.material.clearcoat = isMatte ? 0.0 : 1.0;
+            mugOuterMesh.material.clearcoatRoughness = isMatte ? 0.0 : 0.08;
+
+            const intColor = new THREE.Color(state.interiorColor);
+            mugInnerMesh.material.color = intColor;
+            mugInnerFloorMesh.material.color = intColor;
+            mugRimMesh.material.color = intColor;
+
+            mugHandleMesh.material.color = intColor;
+            mugHandleMesh.material.roughness = isMatte ? 0.72 : 0.15;
+            mugHandleMesh.material.clearcoat = isMatte ? 0.0 : 1.0;
+            mugHandleMesh.material.clearcoatRoughness = isMatte ? 0.0 : 0.08;
+        }
+
+        function updateApp() {
+            drawFlatBanner();
+            update3DMaterials();
+
+            hexExterior.innerText = state.exteriorColor.toUpperCase();
+            hexInterior.innerText = state.interiorColor.toUpperCase();
+        }
+
+        function showToast(text, duration = 3000) {
+            toastText.innerText = text;
+            toastNotification.classList.remove('translate-x-96');
+            setTimeout(() => {
+                toastNotification.classList.add('translate-x-96');
+            }, duration);
+        }
+
+        // --- SISTEMA NEURAL FLUX 4K FOTOREALISTA ---
+        async function executeAIDesignAgent(prompt) {
+            const query = prompt.toLowerCase().trim();
+            
+            canvasLoader.classList.remove('hidden');
+            aiStatusBadge.className = "text-violet-400 flex items-center gap-1";
+            aiStatusBadge.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Conectando ao Flux 4K...`;
+            aiThoughtLog.innerHTML = `<span class="typing">O processador de Elite FLUX 4K está a renderizar a tua obra-prima. Por favor aguarde...</span>`;
+
+            // Prompt super detalhado em inglês para fotorealismo
+            const queryEnglish = `masterpiece, ultra-detailed photography of ${query}, hyper-realistic, 8k resolution, perfect anatomical faces, cinematic lighting, sharp focus`;
+
+            const randomSeed = Math.floor(Math.random() * 999999);
+            const width = 1024;
+            const height = 512; 
+            
+            // Força o modelo Flux!
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(queryEnglish)}?width=${width}&height=${height}&seed=${randomSeed}&nologo=true&model=flux`;
+
+            try {
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+                
+                const img = new Image();
+                img.onload = function() {
+                    state.customFullBannerImage = img; 
+                    state.customFullBannerName = null;
+                    state.theme = 'custom';
+                    
+                    // Esconde textos para não atrapalhar a arte 4K
+                    state.textLine1 = "";
+                    state.textLine2 = "";
+                    inputTextL1.value = "";
+                    inputTextL2.value = "";
+
+                    state.exteriorColor = '#121214';
+                    state.interiorColor = '#FFFFFF';
+                    colorExterior.value = state.exteriorColor;
+                    colorInterior.value = state.interiorColor;
+
+                    canvasLoader.classList.add('hidden');
+                    aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
+                    aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
+                    aiThoughtLog.innerHTML = `Sucesso! Fotografia gerada: "${prompt}". A imagem foi perfeitamente enquadrada (sem achatamento).`;
+
+                    updateApp();
+                };
+                img.src = URL.createObjectURL(blob);
+            } catch (err) {
+                canvasLoader.classList.add('hidden');
+                aiStatusBadge.className = "text-red-400 flex items-center gap-1";
+                aiStatusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Falha na Rede`;
+                aiThoughtLog.innerHTML = `Ocorreu um erro na renderização. Tente de novo!`;
+            }
+        }
+
+        function getCompressedImageBase64(img, maxWidth = 800, quality = 0.6) {
+            return new Promise((resolve) => {
+                if (!img) return resolve(null);
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const scale = Math.min(1, maxWidth / img.width);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    resolve(compressedDataUrl);
+                } catch (e) {
+                    console.error("Erro ao comprimir imagem:", e);
+                    resolve(null);
+                }
+            });
+        }
+
+        async function generateShareLink() {
+            showToast("⚡ A guardar no servidor...", 2000);
+            try {
+                let fullArtData = null;
+
+                if (state.customFullBannerImage) {
+                    fullArtData = await getCompressedImageBase64(state.customFullBannerImage, 800, 0.6);
+                }
+
+                let logoData = null;
+                if (state.customLogoImage) {
+                    logoData = await getCompressedImageBase64(state.customLogoImage, 300, 0.6);
+                }
+
+                const stateToSave = {
+                    finish: state.finish,
+                    exteriorColor: state.exteriorColor,
+                    interiorColor: state.interiorColor,
+                    logoColor: state.logoColor,
+                    logoScale: state.logoScale,
+                    textLine1: state.textLine1,
+                    textLine2: state.textLine2,
+                    textColor: state.textColor,
+                    fontFamily: state.fontFamily,
+                    aiVectorShape: state.aiVectorShape,
+                    fullArtData: fullArtData,
+                    logoData: logoData
+                };
+
+                const newId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+                
+                await setDoc(doc(db, "projetos_canecas", newId), stateToSave);
+
+                const baseUrl = window.location.href.split('?')[0].split('#')[0];
+                const clientUrl = `${baseUrl}?id=${newId}`;
+
+                const dummyTextarea = document.createElement('textarea');
+                document.body.appendChild(dummyTextarea);
+                dummyTextarea.value = clientUrl;
+                dummyTextarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummyTextarea);
+
+                showToast("🔗 Link curto copiado com sucesso!");
+            } catch (err) {
+                console.error("Falha ao salvar no banco:", err);
+                showToast("❌ Erro ao guardar no servidor. Tente novamente.");
+            }
+        }
+
+        async function checkUrlState() {
+            const params = new URLSearchParams(window.location.search);
+            const idParam = params.get('id');
+
+            if (idParam) {
+                loaderText.innerText = "A CARREGAR PROJETO DA NUVEM...";
+                canvasLoader.classList.remove('hidden');
+                
+                try {
+                    const docRef = doc(db, "projetos_canecas", idParam);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists()) {
+                        const savedState = docSnap.data();
+                        enterViewerMode(savedState);
+                        showToast("✅ Projeto carregado com sucesso!");
+                    } else {
+                        showToast("⚠️ Link inválido ou projeto não encontrado.");
+                        canvasLoader.classList.add('hidden');
+                    }
+                } catch (err) {
+                    console.error("Falha ao buscar projeto:", err);
+                    showToast("⚠️ Falha ao conectar ao servidor.");
+                    canvasLoader.classList.add('hidden');
+                }
+            }
+        }
+
+        function enterViewerMode(savedState) {
+            designerPanel.classList.add('hidden');
+            clientPanel.classList.remove('hidden');
+            bannerSection.classList.add('hidden');
+            designerStatusBadge.classList.add('hidden');
+            clientStatusBadge.classList.remove('hidden');
+            btnDownloadBanner.classList.add('hidden');
+            btnClearAllArt.classList.add('hidden');
+            btnShareClient.classList.add('hidden');
+
+            if (savedState) {
+                state.finish = savedState.finish || 'matte';
+                state.exteriorColor = savedState.exteriorColor || '#121214';
+                state.interiorColor = savedState.interiorColor || '#FFD700';
+                state.logoColor = savedState.logoColor || '#000000';
+                state.logoScale = savedState.logoScale || 100;
+                state.textLine1 = savedState.textLine1 || '';
+                state.textLine2 = savedState.textLine2 || '';
+                state.textColor = savedState.textColor || '#FFD700';
+                state.fontFamily = savedState.fontFamily || 'Bebas Neue';
+                state.aiVectorShape = savedState.aiVectorShape || 'batman-sigil';
+
+                if (state.finish === 'matte') {
+                    btnFinishMatte.className = "py-1 px-3 rounded-lg border border-violet-500/50 text-violet-300 bg-violet-500/10 font-bold text-[11px] transition-all";
+                    btnFinishGlossy.className = "py-1 px-3 rounded-lg border border-white/10 text-white bg-transparent hover:border-white/20 font-bold text-[11px] transition-all";
+                } else {
+                    btnFinishGlossy.className = "py-1 px-3 rounded-lg border border-violet-500/50 text-violet-300 bg-violet-500/10 font-bold text-[11px] transition-all";
+                    btnFinishMatte.className = "py-1 px-3 rounded-lg border border-white/10 text-white bg-transparent hover:border-white/20 font-bold text-[11px] transition-all";
+                }
+
+                if (savedState.logoData) {
+                    const imgLogo = new Image();
+                    imgLogo.onload = function() {
+                        state.customLogoImage = imgLogo;
+                        updateApp();
+                    };
+                    imgLogo.src = savedState.logoData;
+                }
+
+                if (savedState.fullArtData) {
+                    const img = new Image();
+                    img.onload = function() {
+                        state.customFullBannerImage = img;
+                        canvasLoader.classList.add('hidden');
+                        updateApp();
+                    };
+                    img.onerror = function() {
+                        canvasLoader.classList.add('hidden');
+                        showToast("⚠️ Erro ao carregar a imagem da arte.");
+                        updateApp();
+                    };
+                    img.src = savedState.fullArtData;
+                } else {
+                    canvasLoader.classList.add('hidden');
+                    updateApp();
+                }
+            }
+        }
+
+        function exitViewerMode() {
+            window.location.search = ""; 
+        }
+
+        tabAI.addEventListener('click', () => {
+            tabAI.className = "flex-1 py-2 text-center font-bold text-sm text-violet-400 border-b-2 border-violet-500 transition-all flex items-center justify-center gap-2";
+            tabManual.className = "flex-1 py-2 text-center font-bold text-sm text-gray-500 hover:text-white transition-all flex items-center justify-center gap-2";
+            panelAI.classList.remove('hidden');
+            panelManual.classList.add('hidden');
         });
+
+        tabManual.addEventListener('click', () => {
+            tabManual.className = "flex-1 py-2 text-center font-bold text-sm text-violet-400 border-b-2 border-violet-500 transition-all flex items-center justify-center gap-2";
+            tabAI.className = "flex-1 py-2 text-center font-bold text-sm text-gray-500 hover:text-white transition-all flex items-center justify-center gap-2";
+            panelManual.classList.remove('hidden');
+            panelAI.classList.add('hidden');
+        });
+
+        document.querySelectorAll('.quick-prompt-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const text = e.target.innerText.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, "").trim();
+                aiPromptText.value = text;
+                executeAIDesignAgent(text);
+            });
+        });
+
+        btnGenerateAI.addEventListener('click', () => {
+            if (aiPromptText.value.trim() === '') return;
+            executeAIDesignAgent(aiPromptText.value);
+        });
+
+        colorExterior.addEventListener('input', (e) => {
+            state.exteriorColor = e.target.value;
+            updateApp();
+        });
+
+        colorInterior.addEventListener('input', (e) => {
+            state.interiorColor = e.target.value;
+            updateApp();
+        });
+
+        colorLogo.addEventListener('input', (e) => {
+            state.logoColor = e.target.value;
+            updateApp();
+        });
+
+        sliderLogoScale.addEventListener('input', (e) => {
+            state.logoScale = parseInt(e.target.value);
+            updateApp();
+        });
+
+        inputTextL1.addEventListener('input', (e) => {
+            state.textLine1 = e.target.value;
+            updateApp();
+        });
+
+        inputTextL2.addEventListener('input', (e) => {
+            state.textLine2 = e.target.value;
+            updateApp();
+        });
+
+        selectFont.addEventListener('change', (e) => {
+            state.fontFamily = e.target.value;
+            updateApp();
+        });
+
+        colorText.addEventListener('input', (e) => {
+            state.textColor = e.target.value;
+            updateApp();
+        });
+
+        inputCustomLogo.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                state.customLogoName = file.name; 
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        state.customLogoImage = img;
+                        state.customFullBannerImage = null;
+                        state.customFullBannerName = null;
+                        uploadFeedback.classList.remove('hidden');
+                        uploadBannerFeedback.classList.add('hidden');
+                        updateApp();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        inputFullBanner.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                state.customFullBannerName = file.name; 
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        state.customFullBannerImage = img;
+                        state.customLogoImage = null;
+                        state.customLogoName = null;
+                        uploadBannerFeedback.classList.remove('hidden');
+                        uploadFeedback.classList.add('hidden');
+                        updateApp();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        btnResetFullBanner.addEventListener('click', () => {
+            state.customFullBannerImage = null;
+            state.customFullBannerName = null;
+            inputFullBanner.value = '';
+            uploadBannerFeedback.classList.add('hidden');
+            updateApp();
+        });
+
+        btnFinishMatte.addEventListener('click', () => {
+            state.finish = 'matte';
+            btnFinishMatte.className = "py-1 px-3 rounded-lg border border-violet-500/50 text-violet-300 bg-violet-500/10 font-bold text-[11px] transition-all";
+            btnFinishGlossy.className = "py-1 px-3 rounded-lg border border-white/10 text-white bg-transparent hover:border-white/20 font-bold text-[11px] transition-all";
+            updateApp();
+        });
+
+        btnFinishGlossy.addEventListener('click', () => {
+            state.finish = 'glossy';
+            btnFinishGlossy.className = "py-1 px-3 rounded-lg border border-violet-500/50 text-violet-300 bg-violet-500/10 font-bold text-[11px] transition-all";
+            btnFinishMatte.className = "py-1 px-3 rounded-lg border border-white/10 text-white bg-transparent hover:border-white/20 font-bold text-[11px] transition-all";
+            updateApp();
+        });
+
+        btnAutoRotate.addEventListener('click', () => {
+            state.isAutoRotating = !state.isAutoRotating;
+            if (state.isAutoRotating) {
+                btnAutoRotate.classList.add('bg-violet-600', 'text-white');
+            } else {
+                btnAutoRotate.classList.remove('bg-violet-600', 'text-white');
+            }
+        });
+
+        btnResetAngle.addEventListener('click', () => {
+            camera.position.set(0, 4, 18);
+            orbitControls.target.set(0, 0, 0);
+            orbitControls.update();
+            mugGroup.rotation.set(0, 0, 0); 
+        });
+
+        btnDownloadBanner.addEventListener('click', () => {
+            const dataUrl = bannerCanvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `arte-sublimacao-mugstudio-205x92mm.png`;
+            link.href = dataUrl;
+            link.click();
+        });
+
+        btnDownloadMockup.addEventListener('click', () => {
+            renderer.render(scene, camera);
+            const dataUrl = renderer.domElement.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `mockup-3d-mugstudio-205x92mm.png`;
+            link.href = dataUrl;
+            link.click();
+        });
+
+        btnShareClient.addEventListener('click', generateShareLink);
+
+        btnApproveDesign.addEventListener('click', () => {
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+            showToast("🎉 Abrindo WhatsApp...");
+            btnApproveDesign.innerHTML = `<i class="fa-solid fa-circle-check text-xl"></i> DESIGN APROVADO!`;
+            btnApproveDesign.className = "w-full bg-emerald-600 text-white py-4 px-6 rounded-2xl shadow-xl font-black text-lg flex items-center justify-center gap-2.5 border border-emerald-400 pointer-events-none";
+
+            const meuNumeroWhatsApp = "5511939545816"; 
+            
+            const linkDoProjeto = window.location.href;
+            const msgAprovacao = `✅ Olá! Acabei de APROVAR o projeto 3D da caneca.\nPode seguir com a produção!\n\nLink do projeto: ${linkDoProjeto}`;
+            
+            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(msgAprovacao)}`;
+
+            window.location.href = urlWhatsApp;
+        });
+
+        btnRequestChanges.addEventListener('click', () => {
+            feedbackTextContainer.classList.toggle('hidden');
+        });
+
+        btnCopyFeedback.addEventListener('click', () => {
+            const feedback = feedbackText.value.trim();
+            if (feedback === "") {
+                showToast("⚠️ Escreva as alterações que deseja primeiro!");
+                return;
+            }
+            
+            const linkDoProjeto = window.location.href;
+            const fullFeedbackMsg = `⚠️ Olá! Avaliei o mockup 3D e gostaria de solicitar os seguintes ajustes:\n\n"${feedback}"\n\nLink do projeto: ${linkDoProjeto}`;
+
+            const meuNumeroWhatsApp = "5511939545816"; 
+            
+            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(fullFeedbackMsg)}`;
+
+            showToast("📱 A abrir o WhatsApp...");
+            
+            window.location.href = urlWhatsApp;
+        });
+
+        btnExitViewer.addEventListener('click', exitViewerMode);
+
+        btnClearAllArt.addEventListener('click', () => {
+            state.customLogoImage = null;
+            state.customLogoName = null;
+            state.customFullBannerImage = null;
+            state.customFullBannerName = null;
+            state.textLine1 = '';
+            state.textLine2 = '';
+            state.aiVectorShape = 'none';
+            
+            state.exteriorColor = '#FFFFFF';
+            state.interiorColor = '#FFFFFF';
+            state.textColor = '#000000';
+            state.logoColor = '#000000';
+
+            colorExterior.value = '#FFFFFF';
+            colorInterior.value = '#FFFFFF';
+            colorLogo.value = '#000000';
+            colorText.value = '#000000';
+            inputTextL1.value = '';
+            inputTextL2.value = '';
+            inputCustomLogo.value = '';
+            inputFullBanner.value = '';
+            
+            uploadFeedback.classList.add('hidden');
+            uploadBannerFeedback.classList.add('hidden');
+
+            updateApp();
+        });
+
+        // --- LÓGICA DE AUTENTICAÇÃO E BLOQUEIO DE TELA ---
+        
+        // Clicou no botão do Google
+        btnGoogleLogin.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                showToast("❌ Erro ao entrar com o Google.");
+                console.error(error);
+            }
+        });
+
+        // Clicou no botão Entrar (Email/Senha)
+        btnEmailLogin.addEventListener('click', async () => {
+            const email = authEmail.value;
+            const password = authPassword.value;
+            if(!email || !password) return showToast("⚠️ Digite seu email e senha.");
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                showToast("❌ Usuário não encontrado ou senha incorreta.");
+            }
+        });
+
+        // Clicou no botão Criar Conta (Email/Senha)
+        btnEmailSignup.addEventListener('click', async () => {
+            const email = authEmail.value;
+            const password = authPassword.value;
+            if(!email || !password) return showToast("⚠️ Digite um email e uma senha.");
+            if(password.length < 6) return showToast("⚠️ A senha deve ter no mínimo 6 letras.");
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showToast("✅ Conta criada com sucesso!");
+            } catch (error) {
+                showToast("❌ Erro ao criar conta. O email já existe?");
+            }
+        });
+
+        // Clicou em Sair
+        btnLogout.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                showToast("🔒 Sessão encerrada.");
+            });
+        });
+
+        window.onload = function() {
+            // Verifica se é o Cliente a abrir o link
+            const params = new URLSearchParams(window.location.search);
+            const isClientViewer = params.has('id');
+
+            if (isClientViewer) {
+                // MODO CLIENTE: Oculta a tela de login e deixa entrar direto
+                loginScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                mainApp.classList.add('flex');
+                
+                // Inicializa o 3D e puxa a arte do servidor
+                initThreeJS();
+                checkUrlState();
+                updateApp();
+            } else {
+                // MODO DESIGNER: Exige Autenticação para entrar
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        // Está logado: Oculta o login e mostra o site
+                        loginScreen.classList.add('hidden');
+                        mainApp.classList.remove('hidden');
+                        mainApp.classList.add('flex');
+                        userProfileArea.classList.remove('hidden');
+                        userProfileArea.classList.add('flex');
+                        
+                        userNameDisplay.innerText = user.displayName || user.email.split('@')[0];
+                        showToast(`👋 Bem-vindo(a), ${userNameDisplay.innerText}!`);
+                        
+                        // Inicializa o 3D (Se já estiver logado, não tem problema chamar de novo porque re-renderiza)
+                        if(!scene) {
+                            initThreeJS();
+                            updateApp();
+                        }
+                        // Recalcula o tamanho da janela do 3D que estava "escondida"
+                        setTimeout(onWindowResize, 100);
+                    } else {
+                        // Não está logado: Mostra o ecrã de login e esconde o site
+                        loginScreen.classList.remove('hidden');
+                        mainApp.classList.add('hidden');
+                        mainApp.classList.remove('flex');
+                    }
+                });
+            }
+        };
     </script>
 </body>
 </html>
