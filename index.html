@@ -13,7 +13,7 @@
 </head>
 <body>
 
-    <!-- TELA DE LOGIN -->
+    <!-- ECRÃ DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 z-[100] bg-[#0B0C10] flex items-center justify-center p-4">
         <div class="bg-[#151B24] border border-white/10 p-8 rounded-3xl w-full max-w-sm flex flex-col gap-4">
             <h1 class="text-2xl font-bold text-white text-center mb-4">LOGIN MUGSTUDIO</h1>
@@ -53,14 +53,22 @@
         }));
 
         const provider = new GoogleAuthProvider();
-        let initialized3D = false;
+        let scene, camera, renderer, mug;
+
+        // Observer para garantir que o 3D redimensiona assim que o mainApp aparecer
+        const observer = new MutationObserver(() => {
+            if (!document.getElementById('mainApp').classList.contains('hidden')) {
+                window.dispatchEvent(new Event('resize'));
+            }
+        });
+        observer.observe(document.getElementById('mainApp'), { attributes: true, attributeFilter: ['class'] });
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('mainApp').classList.remove('hidden');
                 document.getElementById('mainApp').classList.add('flex');
-                if (!initialized3D) setTimeout(initThreeJS, 300);
+                initThreeJS();
             } else {
                 document.getElementById('loginScreen').classList.remove('hidden');
                 document.getElementById('mainApp').classList.add('hidden');
@@ -73,16 +81,18 @@
 
         function initThreeJS() {
             const container = document.getElementById('canvasContainer');
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            if (container.querySelector('canvas')) return;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(renderer.domElement);
             
-            const geometry = new THREE.CylinderGeometry(1.2, 1.2, 2.5, 32);
+            const geometry = new THREE.CylinderGeometry(1.2, 1.2, 2.5, 64);
             const material = new THREE.MeshPhongMaterial({ color: 0x8b5cf6, shininess: 100 });
-            const mug = new THREE.Mesh(geometry, material);
+            mug = new THREE.Mesh(geometry, material);
             scene.add(mug);
             scene.add(new THREE.AmbientLight(0xffffff, 0.8));
             
@@ -91,7 +101,6 @@
             
             function animate() { requestAnimationFrame(animate); mug.rotation.y += 0.01; renderer.render(scene, camera); }
             animate();
-            initialized3D = true;
         }
     </script>
 </body>
