@@ -357,6 +357,58 @@
                                 <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="aplique visual neon cyberpunk com saturação alta">Neon</button>
                                 <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="mostrar imagem inteira no gabarito sem cortar">Sem cortar</button>
                             </div>
+
+                            <div class="bg-black/35 border border-violet-500/20 rounded-2xl p-4 flex flex-col gap-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                    <div>
+                                        <span class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
+                                            <i class="fa-solid fa-crop-simple"></i> ENQUADRAMENTO PROFISSIONAL
+                                        </span>
+                                        <p class="text-[10px] text-gray-500 mt-1">Ajuste a arte no gabarito antes de enviar ao cliente.</p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button id="btnCenterArtwork"
+                                            class="text-[10px] text-gray-300 hover:text-white bg-violet-600/20 border border-violet-500/30 hover:border-violet-400 px-3 py-2 rounded-xl transition-all">
+                                            <i class="fa-solid fa-crosshairs"></i> Centralizar
+                                        </button>
+                                        <button id="btnResetArtworkFrame"
+                                            class="text-[10px] text-gray-300 hover:text-white bg-black/40 border border-white/10 hover:border-red-500/40 px-3 py-2 rounded-xl transition-all">
+                                            <i class="fa-solid fa-rotate-left"></i> Resetar Frame
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-[10px] font-mono text-gray-500 uppercase flex justify-between mb-1">
+                                            <span>Zoom da arte</span><span id="artZoomValue" class="text-violet-300">100%</span>
+                                        </label>
+                                        <input type="range" id="sliderArtZoom" min="50" max="220" value="100"
+                                            class="w-full accent-violet-500 h-2 bg-gray-700 rounded-lg cursor-pointer">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-mono text-gray-500 uppercase flex justify-between mb-1">
+                                            <span>Rotação</span><span id="artRotationValue" class="text-violet-300">0°</span>
+                                        </label>
+                                        <input type="range" id="sliderArtRotation" min="-15" max="15" value="0"
+                                            class="w-full accent-violet-500 h-2 bg-gray-700 rounded-lg cursor-pointer">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-mono text-gray-500 uppercase flex justify-between mb-1">
+                                            <span>Mover horizontal</span><span id="artOffsetXValue" class="text-violet-300">0</span>
+                                        </label>
+                                        <input type="range" id="sliderArtOffsetX" min="-100" max="100" value="0"
+                                            class="w-full accent-violet-500 h-2 bg-gray-700 rounded-lg cursor-pointer">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-mono text-gray-500 uppercase flex justify-between mb-1">
+                                            <span>Mover vertical</span><span id="artOffsetYValue" class="text-violet-300">0</span>
+                                        </label>
+                                        <input type="range" id="sliderArtOffsetY" min="-100" max="100" value="0"
+                                            class="w-full accent-violet-500 h-2 bg-gray-700 rounded-lg cursor-pointer">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex flex-col gap-2">
@@ -653,6 +705,12 @@
             isAutoRotating: false,
             aiVectorShape: 'batman-sigil',
             imageFitMode: 'cover',
+            imageTransform: {
+                scale: 100,
+                offsetX: 0,
+                offsetY: 0,
+                rotation: 0
+            },
             imageAdjustments: {
                 brightness: 100,
                 contrast: 100,
@@ -691,6 +749,16 @@
         const btnResetImageEdits = document.getElementById('btnResetImageEdits');
         const selectCGStyle = document.getElementById('selectCGStyle');
         const selectImageFitMode = document.getElementById('selectImageFitMode');
+        const sliderArtZoom = document.getElementById('sliderArtZoom');
+        const sliderArtOffsetX = document.getElementById('sliderArtOffsetX');
+        const sliderArtOffsetY = document.getElementById('sliderArtOffsetY');
+        const sliderArtRotation = document.getElementById('sliderArtRotation');
+        const artZoomValue = document.getElementById('artZoomValue');
+        const artOffsetXValue = document.getElementById('artOffsetXValue');
+        const artOffsetYValue = document.getElementById('artOffsetYValue');
+        const artRotationValue = document.getElementById('artRotationValue');
+        const btnCenterArtwork = document.getElementById('btnCenterArtwork');
+        const btnResetArtworkFrame = document.getElementById('btnResetArtworkFrame');
         const aiPromptText = document.getElementById('aiPromptText');
         const aiThoughtLog = document.getElementById('aiThoughtLog');
         const aiStatusBadge = document.getElementById('aiStatusBadge');
@@ -742,26 +810,89 @@
         let canvasTexture;
         let toastTimeoutId;
 
-        // --- SISTEMA INTELIGENTE DE CORTES (Object-Fit) ---
+        // --- SISTEMA INTELIGENTE DE CORTES E ENQUADRAMENTO ---
+        function clampNumber(value, min, max) {
+            const numericValue = Number(value);
+            if (!Number.isFinite(numericValue)) return min;
+            return Math.min(max, Math.max(min, numericValue));
+        }
+
         function getCanvasImageFilter() {
             const adj = state.imageAdjustments || {};
-            const brightness = adj.brightness ?? 100;
-            const contrast = adj.contrast ?? 100;
-            const saturation = adj.saturation ?? 100;
-            const hue = adj.hue ?? 0;
-            const blur = adj.blur ?? 0;
-            const grayscale = adj.grayscale ?? 0;
-            const sepia = adj.sepia ?? 0;
-
             return [
-                `brightness(${brightness}%)`,
-                `contrast(${contrast}%)`,
-                `saturate(${saturation}%)`,
-                `hue-rotate(${hue}deg)`,
-                `blur(${blur}px)`,
-                `grayscale(${grayscale}%)`,
-                `sepia(${sepia}%)`
+                `brightness(${adj.brightness ?? 100}%)`,
+                `contrast(${adj.contrast ?? 100}%)`,
+                `saturate(${adj.saturation ?? 100}%)`,
+                `hue-rotate(${adj.hue ?? 0}deg)`,
+                `blur(${adj.blur ?? 0}px)`,
+                `grayscale(${adj.grayscale ?? 0}%)`,
+                `sepia(${adj.sepia ?? 0}%)`
             ].join(' ');
+        }
+
+        function resetImageAdjustments() {
+            state.imageAdjustments = {
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                hue: 0,
+                blur: 0,
+                grayscale: 0,
+                sepia: 0
+            };
+        }
+
+        function resetImageTransform() {
+            state.imageTransform = {
+                scale: 100,
+                offsetX: 0,
+                offsetY: 0,
+                rotation: 0
+            };
+            syncArtworkFramingControls();
+        }
+
+        function syncArtworkFramingControls() {
+            const transform = state.imageTransform || {};
+            const scale = clampNumber(transform.scale ?? 100, 50, 220);
+            const offsetX = clampNumber(transform.offsetX ?? 0, -100, 100);
+            const offsetY = clampNumber(transform.offsetY ?? 0, -100, 100);
+            const rotation = clampNumber(transform.rotation ?? 0, -15, 15);
+
+            if (sliderArtZoom) sliderArtZoom.value = scale;
+            if (sliderArtOffsetX) sliderArtOffsetX.value = offsetX;
+            if (sliderArtOffsetY) sliderArtOffsetY.value = offsetY;
+            if (sliderArtRotation) sliderArtRotation.value = rotation;
+
+            if (artZoomValue) artZoomValue.textContent = `${scale}%`;
+            if (artOffsetXValue) artOffsetXValue.textContent = offsetX;
+            if (artOffsetYValue) artOffsetYValue.textContent = offsetY;
+            if (artRotationValue) artRotationValue.textContent = `${rotation}°`;
+        }
+
+        function updateArtworkFramingFromControls() {
+            state.imageTransform = {
+                scale: clampNumber(parseInt(sliderArtZoom?.value || '100', 10), 50, 220),
+                offsetX: clampNumber(parseInt(sliderArtOffsetX?.value || '0', 10), -100, 100),
+                offsetY: clampNumber(parseInt(sliderArtOffsetY?.value || '0', 10), -100, 100),
+                rotation: clampNumber(parseInt(sliderArtRotation?.value || '0', 10), -15, 15)
+            };
+
+            syncArtworkFramingControls();
+            updateApp();
+        }
+
+        function centerArtworkFrame() {
+            state.imageTransform = {
+                ...(state.imageTransform || {}),
+                offsetX: 0,
+                offsetY: 0,
+                rotation: 0
+            };
+
+            syncArtworkFramingControls();
+            updateApp();
+            showToast('🎯 Arte centralizada no gabarito.');
         }
 
         function getImageDrawBox(img, targetW, targetH, fitMode = 'cover') {
@@ -783,19 +914,40 @@
                     drawW = targetH * imgRatio;
                     offsetX = (targetW - drawW) / 2;
                 }
-
-                return { drawW, drawH, x: offsetX, y: offsetY };
-            }
-
-            if (imgRatio > canvasRatio) {
+            } else if (imgRatio > canvasRatio) {
                 drawW = targetH * imgRatio;
-                offsetX = (drawW - targetW) / 2;
+                offsetX = (targetW - drawW) / 2;
             } else {
                 drawH = targetW / imgRatio;
-                offsetY = (drawH - targetH) / 2;
+                offsetY = (targetH - drawH) / 2;
             }
 
-            return { drawW, drawH, x: -offsetX, y: -offsetY };
+            const transform = state.imageTransform || {};
+            const scale = clampNumber(transform.scale ?? 100, 50, 220) / 100;
+            const finalW = drawW * scale;
+            const finalH = drawH * scale;
+            const moveX = (clampNumber(transform.offsetX ?? 0, -100, 100) / 100) * targetW * 0.5;
+            const moveY = (clampNumber(transform.offsetY ?? 0, -100, 100) / 100) * targetH * 0.5;
+
+            return {
+                drawW: finalW,
+                drawH: finalH,
+                x: offsetX + ((drawW - finalW) / 2) + moveX,
+                y: offsetY + ((drawH - finalH) / 2) + moveY,
+                rotation: clampNumber(transform.rotation ?? 0, -15, 15)
+            };
+        }
+
+        function drawImageWithTransform(ctx, img, originX, originY, box) {
+            const centerX = originX + box.x + (box.drawW / 2);
+            const centerY = originY + box.y + (box.drawH / 2);
+            const angle = (box.rotation || 0) * Math.PI / 180;
+
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(angle);
+            ctx.drawImage(img, -box.drawW / 2, -box.drawH / 2, box.drawW, box.drawH);
+            ctx.restore();
         }
 
         function drawFlatBanner() {
@@ -822,7 +974,7 @@
                 bannerCtx.fillRect(marginX, 0, printW, h);
 
                 bannerCtx.filter = getCanvasImageFilter();
-                bannerCtx.drawImage(img, marginX + box.x, box.y, box.drawW, box.drawH);
+                drawImageWithTransform(bannerCtx, img, marginX, 0, box);
                 bannerCtx.filter = 'none';
 
                 bannerCtx.restore();
@@ -1232,7 +1384,6 @@
             }
         }
 
-
         const CG_STYLE_PRESETS = {
             photorealistic: 'photorealistic premium commercial artwork, realistic textures, accurate lighting, sharp details',
             product: 'professional product advertising composition, clean layout, premium branding, high-end studio lighting',
@@ -1246,20 +1397,20 @@
 
         const NEGATIVE_PROMPT = 'distorted, stretched, warped, low quality, blurry, deformed, bad anatomy, extra fingers, duplicate face, watermark, logo, text artifacts, cropped subject, broken composition';
 
-        function clampNumber(value, min, max) {
-            return Math.min(max, Math.max(min, value));
-        }
+        function buildCGPrompt(userPrompt) {
+            const cleanPrompt = normalizeText(userPrompt, 800);
+            const style = CG_STYLE_PRESETS[state.cgStylePreset] || CG_STYLE_PRESETS.photorealistic;
 
-        function resetImageAdjustments() {
-            state.imageAdjustments = {
-                brightness: 100,
-                contrast: 100,
-                saturation: 100,
-                hue: 0,
-                blur: 0,
-                grayscale: 0,
-                sepia: 0
-            };
+            return [
+                `masterpiece, ${style}`,
+                `subject: ${cleanPrompt}`,
+                'designed specifically for a full mug wrap sublimation template',
+                'wide panoramic horizontal banner composition, 205x92mm aspect ratio',
+                'safe center composition, important subject away from the left and right handle gap',
+                'balanced layout, no stretching, no distortion, preserve natural proportions',
+                'print-ready artwork, high resolution, crisp details',
+                `negative prompt: ${NEGATIVE_PROMPT}`
+            ].join(', ');
         }
 
         function applyImageEditCommand(command) {
@@ -1275,62 +1426,105 @@
                 return;
             }
 
-            const adj = { ...state.imageAdjustments };
+            const adj = { ...(state.imageAdjustments || {}) };
             const actions = [];
 
-            if (/(reset|resetar|original|normal|remover edição|sem filtro)/.test(text)) {
+            if (/(reset|resetar|original|normal|remover edição|remover edicao|sem filtro)/.test(text)) {
                 resetImageAdjustments();
+                resetImageTransform();
                 state.imageFitMode = 'cover';
                 if (selectImageFitMode) selectImageFitMode.value = state.imageFitMode;
                 updateApp();
-                safeSetText(aiThoughtLog, 'Edição resetada. A arte voltou para o tratamento visual original.');
-                showToast('↩️ Edição resetada.');
+                safeSetText(aiThoughtLog, 'Edição e enquadramento resetados. A arte voltou para o estado original.');
+                showToast('↩️ Arte resetada.');
                 return;
             }
 
             if (/(sem cortar|imagem inteira|mostrar tudo|inteira|não cortar|nao cortar|contain)/.test(text)) {
                 state.imageFitMode = 'contain';
                 if (selectImageFitMode) selectImageFitMode.value = 'contain';
-                actions.push('encaixe alterado para mostrar a imagem inteira');
+                actions.push('imagem inteira no gabarito');
             }
 
             if (/(preencher|cobrir|sem borda|ocupar tudo|cover)/.test(text)) {
                 state.imageFitMode = 'cover';
                 if (selectImageFitMode) selectImageFitMode.value = 'cover';
-                actions.push('encaixe alterado para preencher o gabarito sem deformar');
+                actions.push('preenchimento sem deformar');
+            }
+
+            if (/(centralizar|centro|frente da caneca|meio)/.test(text)) {
+                state.imageTransform = { ...(state.imageTransform || {}), offsetX: 0, offsetY: 0, rotation: 0 };
+                syncArtworkFramingControls();
+                actions.push('arte centralizada');
+            }
+
+            if (/(aproximar|mais zoom|aumentar zoom|ampliar)/.test(text)) {
+                state.imageTransform = { ...(state.imageTransform || {}), scale: clampNumber((state.imageTransform?.scale ?? 100) + 15, 50, 220) };
+                syncArtworkFramingControls();
+                actions.push('zoom aumentado');
+            }
+
+            if (/(afastar|menos zoom|reduzir zoom|diminuir zoom)/.test(text)) {
+                state.imageTransform = { ...(state.imageTransform || {}), scale: clampNumber((state.imageTransform?.scale ?? 100) - 15, 50, 220) };
+                syncArtworkFramingControls();
+                actions.push('zoom reduzido');
+            }
+
+            if (/(esquerda)/.test(text)) {
+                state.imageTransform = { ...(state.imageTransform || {}), offsetX: clampNumber((state.imageTransform?.offsetX ?? 0) - 18, -100, 100) };
+                syncArtworkFramingControls();
+                actions.push('movida para esquerda');
+            }
+
+            if (/(direita)/.test(text)) {
+                state.imageTransform = { ...(state.imageTransform || {}), offsetX: clampNumber((state.imageTransform?.offsetX ?? 0) + 18, -100, 100) };
+                syncArtworkFramingControls();
+                actions.push('movida para direita');
+            }
+
+            if (/(subir|cima|para cima)/.test(text)) {
+                state.imageTransform = { ...(state.imageTransform || {}), offsetY: clampNumber((state.imageTransform?.offsetY ?? 0) - 18, -100, 100) };
+                syncArtworkFramingControls();
+                actions.push('movida para cima');
+            }
+
+            if (/(descer|baixo|para baixo)/.test(text)) {
+                state.imageTransform = { ...(state.imageTransform || {}), offsetY: clampNumber((state.imageTransform?.offsetY ?? 0) + 18, -100, 100) };
+                syncArtworkFramingControls();
+                actions.push('movida para baixo');
             }
 
             if (/(mais brilho|clarear|claro|iluminar|brilhante)/.test(text)) {
-                adj.brightness = clampNumber(adj.brightness + 12, 50, 160);
+                adj.brightness = clampNumber((adj.brightness ?? 100) + 12, 50, 160);
                 actions.push('brilho aumentado');
             }
 
             if (/(menos brilho|escurecer|mais escuro|escuro)/.test(text)) {
-                adj.brightness = clampNumber(adj.brightness - 12, 50, 160);
+                adj.brightness = clampNumber((adj.brightness ?? 100) - 12, 50, 160);
                 actions.push('brilho reduzido');
             }
 
             if (/(contraste|mais impacto|impactante|nítid|nitid|definid|premium|auto melhorar|melhorar)/.test(text)) {
-                adj.contrast = clampNumber(adj.contrast + 18, 60, 180);
-                adj.saturation = clampNumber(adj.saturation + 10, 50, 190);
-                actions.push('contraste e presença visual reforçados');
+                adj.contrast = clampNumber((adj.contrast ?? 100) + 18, 60, 180);
+                adj.saturation = clampNumber((adj.saturation ?? 100) + 10, 50, 190);
+                actions.push('contraste e nitidez visual reforçados');
             }
 
             if (/(saturação|saturacao|cor forte|cores fortes|vibrante|intenso|neon|cyberpunk)/.test(text)) {
-                adj.saturation = clampNumber(adj.saturation + 22, 40, 220);
+                adj.saturation = clampNumber((adj.saturation ?? 100) + 22, 40, 220);
                 actions.push('saturação aumentada');
             }
 
             if (/(menos saturação|menos saturacao|suavizar cor|cores suaves|pastel)/.test(text)) {
-                adj.saturation = clampNumber(adj.saturation - 22, 40, 220);
+                adj.saturation = clampNumber((adj.saturation ?? 100) - 22, 40, 220);
                 actions.push('saturação reduzida');
             }
 
-            if (/(cinematográfico|cinematic|cinema|filme|dramático|dramatico)/.test(text)) {
-                adj.contrast = clampNumber(adj.contrast + 24, 60, 190);
-                adj.saturation = clampNumber(adj.saturation + 8, 40, 180);
-                adj.brightness = clampNumber(adj.brightness - 4, 50, 150);
-                actions.push('color grading cinematográfico aplicado');
+            if (/(cinematográfico|cinematografico|cinematic|cinema|filme|dramático|dramatico)/.test(text)) {
+                adj.contrast = clampNumber((adj.contrast ?? 100) + 24, 60, 190);
+                adj.saturation = clampNumber((adj.saturation ?? 100) + 8, 40, 180);
+                adj.brightness = clampNumber((adj.brightness ?? 100) - 4, 50, 150);
+                actions.push('visual cinematográfico aplicado');
             }
 
             if (/(preto e branco|pb|p&b|grayscale|cinza)/.test(text)) {
@@ -1342,58 +1536,28 @@
             if (/(sépia|sepia|vintage|retrô|retro)/.test(text)) {
                 adj.sepia = 70;
                 adj.grayscale = 0;
-                adj.contrast = clampNumber(adj.contrast + 8, 60, 170);
-                actions.push('efeito vintage/sépia aplicado');
+                adj.contrast = clampNumber((adj.contrast ?? 100) + 8, 60, 170);
+                actions.push('efeito vintage aplicado');
             }
-
-            if (/(desfocar|blur|suavizar fundo|menos nítido|menos nitido)/.test(text)) {
-                adj.blur = clampNumber(adj.blur + 0.8, 0, 4);
-                actions.push('suavização/desfoque leve aplicado');
-            }
-
-            if (/(tirar desfoque|remover blur|mais foco|mais nítido|mais nitido)/.test(text)) {
-                adj.blur = clampNumber(adj.blur - 0.8, 0, 4);
-                adj.contrast = clampNumber(adj.contrast + 10, 60, 190);
-                actions.push('foco visual reforçado');
-            }
-
-            state.imageAdjustments = adj;
 
             if (!actions.length) {
-                adj.contrast = clampNumber(adj.contrast + 10, 60, 180);
-                adj.saturation = clampNumber(adj.saturation + 8, 40, 190);
-                state.imageAdjustments = adj;
+                adj.contrast = clampNumber((adj.contrast ?? 100) + 10, 60, 180);
+                adj.saturation = clampNumber((adj.saturation ?? 100) + 8, 40, 190);
                 actions.push('melhoria geral aplicada');
             }
 
+            state.imageAdjustments = adj;
             updateApp();
 
-            const summary = `Super Agente CG editou a arte: ${actions.join(', ')}.`;
-            safeSetText(aiThoughtLog, summary);
+            safeSetText(aiThoughtLog, `Super Agente CG editou a arte: ${actions.join(', ')}.`);
             aiStatusBadge.className = 'text-emerald-400 flex items-center gap-1';
             aiStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte editada';
             showToast('🎨 Arte editada pelo agente.');
         }
 
-        function buildCGPrompt(userPrompt) {
-            const cleanPrompt = normalizeText(userPrompt, 800);
-            const style = CG_STYLE_PRESETS[state.cgStylePreset] || CG_STYLE_PRESETS.photorealistic;
-
-            return [
-                `masterpiece, ${style}`,
-                `subject: ${cleanPrompt}`,
-                'designed specifically for a full mug wrap sublimation template',
-                'wide panoramic horizontal banner composition',
-                'safe center composition, important subject away from the left and right handle gap',
-                'balanced layout, no stretching, no distortion, preserve natural proportions',
-                'print-ready artwork, high resolution, crisp details',
-                `negative prompt: ${NEGATIVE_PROMPT}`
-            ].join(', ');
-        }
-
         // --- SISTEMA NEURAL FLUX 4K FOTOREALISTA ---
         async function executeAIDesignAgent(prompt) {
-            const query = normalizeText(prompt, 800);
+            const query = normalizeText(prompt, 300).toLowerCase();
 
             if (!query) {
                 showToast('⚠️ Escreva uma ideia para gerar a arte.');
@@ -1410,8 +1574,6 @@
             const queryEnglish = buildCGPrompt(query);
 
             const randomSeed = crypto.getRandomValues(new Uint32Array(1))[0] % 999999;
-
-            // Mantém a geração na proporção exata do gabarito 205x92mm.
             const width = 1025;
             const height = 460;
 
@@ -1445,6 +1607,7 @@
                     state.theme = 'custom';
                     state.imageFitMode = selectImageFitMode?.value || 'cover';
                     resetImageAdjustments();
+                    resetImageTransform();
 
                     // Esconde textos para não atrapalhar a arte 4K.
                     state.textLine1 = '';
@@ -1536,6 +1699,7 @@
                     fontFamily: state.fontFamily,
                     aiVectorShape: state.aiVectorShape,
                     imageFitMode: state.imageFitMode,
+                    imageTransform: state.imageTransform,
                     imageAdjustments: state.imageAdjustments,
                     cgStylePreset: state.cgStylePreset,
                     fullArtData,
@@ -1609,12 +1773,14 @@
                 state.textColor = savedState.textColor || '#FFD700';
                 state.fontFamily = savedState.fontFamily || 'Bebas Neue';
                 state.aiVectorShape = savedState.aiVectorShape || 'batman-sigil';
-                state.imageFitMode = savedState.imageFitMode || 'cover';
+                state.imageFitMode = savedState.imageFitMode || state.imageFitMode;
+                state.imageTransform = savedState.imageTransform || state.imageTransform;
                 state.imageAdjustments = savedState.imageAdjustments || state.imageAdjustments;
                 state.cgStylePreset = savedState.cgStylePreset || state.cgStylePreset;
 
                 if (selectImageFitMode) selectImageFitMode.value = state.imageFitMode;
                 if (selectCGStyle) selectCGStyle.value = state.cgStylePreset;
+                syncArtworkFramingControls();
 
                 if (state.finish === 'matte') {
                     btnFinishMatte.className = "py-1 px-3 rounded-lg border border-violet-500/50 text-violet-300 bg-violet-500/10 font-bold text-[11px] transition-all";
@@ -1671,6 +1837,49 @@
             panelAI.classList.add('hidden');
         });
 
+        selectCGStyle?.addEventListener('change', (e) => {
+            state.cgStylePreset = e.target.value;
+            showToast('🎨 Especialidade visual atualizada.');
+        });
+
+        selectImageFitMode?.addEventListener('change', (e) => {
+            state.imageFitMode = e.target.value;
+            updateApp();
+        });
+
+        [sliderArtZoom, sliderArtOffsetX, sliderArtOffsetY, sliderArtRotation].forEach(slider => {
+            slider?.addEventListener('input', updateArtworkFramingFromControls);
+        });
+
+        btnCenterArtwork?.addEventListener('click', centerArtworkFrame);
+
+        btnResetArtworkFrame?.addEventListener('click', () => {
+            resetImageTransform();
+            updateApp();
+            showToast('↩️ Enquadramento resetado.');
+        });
+
+        btnEditAI?.addEventListener('click', () => {
+            applyImageEditCommand(aiPromptText.value);
+        });
+
+        btnResetImageEdits?.addEventListener('click', () => {
+            resetImageAdjustments();
+            updateApp();
+            safeSetText(aiThoughtLog, 'Filtros de edição removidos. O enquadramento da arte foi mantido.');
+            showToast('↩️ Filtros resetados.');
+        });
+
+        document.querySelectorAll('.agent-edit-command').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const command = btn.dataset.command || btn.textContent;
+                aiPromptText.value = command;
+                applyImageEditCommand(command);
+            });
+        });
+
+        syncArtworkFramingControls();
+
         document.querySelectorAll('.quick-prompt-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const text = e.currentTarget.textContent.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, "").trim();
@@ -1682,48 +1891,6 @@
         btnGenerateAI.addEventListener('click', () => {
             if (aiPromptText.value.trim() === '') return;
             executeAIDesignAgent(aiPromptText.value);
-        });
-
-        if (btnEditAI) {
-            btnEditAI.addEventListener('click', () => {
-                applyImageEditCommand(aiPromptText.value);
-            });
-        }
-
-        if (btnResetImageEdits) {
-            btnResetImageEdits.addEventListener('click', () => {
-                resetImageAdjustments();
-                state.imageFitMode = 'cover';
-                if (selectImageFitMode) selectImageFitMode.value = 'cover';
-                updateApp();
-                safeSetText(aiThoughtLog, 'Edição visual resetada. A arte voltou para o tratamento original.');
-                showToast('↩️ Edição resetada.');
-            });
-        }
-
-        if (selectCGStyle) {
-            selectCGStyle.addEventListener('change', (e) => {
-                state.cgStylePreset = e.target.value;
-                safeSetText(aiThoughtLog, `Especialidade visual alterada para: ${e.target.options[e.target.selectedIndex].text}.`);
-            });
-        }
-
-        if (selectImageFitMode) {
-            selectImageFitMode.addEventListener('change', (e) => {
-                state.imageFitMode = e.target.value;
-                updateApp();
-                safeSetText(aiThoughtLog, state.imageFitMode === 'contain'
-                    ? 'Encaixe alterado: imagem inteira visível no gabarito, sem cortes.'
-                    : 'Encaixe alterado: gabarito preenchido sem deformar a imagem.');
-            });
-        }
-
-        document.querySelectorAll('.agent-edit-command').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const command = btn.dataset.command || btn.textContent;
-                aiPromptText.value = command;
-                applyImageEditCommand(command);
-            });
         });
 
         colorExterior.addEventListener('input', (e) => {
@@ -1799,8 +1966,8 @@
                 state.customFullBannerImage = img;
                 state.customLogoImage = null;
                 state.customLogoName = null;
-                state.imageFitMode = selectImageFitMode?.value || 'cover';
                 resetImageAdjustments();
+                resetImageTransform();
 
                 uploadBannerFeedback.classList.remove('hidden');
                 uploadFeedback.classList.add('hidden');
@@ -1816,8 +1983,7 @@
             state.customFullBannerImage = null;
             state.customFullBannerName = null;
             resetImageAdjustments();
-            state.imageFitMode = 'cover';
-            if (selectImageFitMode) selectImageFitMode.value = 'cover';
+            resetImageTransform();
             inputFullBanner.value = '';
             uploadBannerFeedback.classList.add('hidden');
             updateApp();
