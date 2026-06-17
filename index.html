@@ -682,6 +682,7 @@
         let mugGroup;
         let mugOuterMesh, mugInnerMesh, mugRimMesh, mugBottomCapMesh, mugInnerFloorMesh, mugHandleMesh;
         let canvasTexture;
+        let toastTimeoutId;
 
         // --- SISTEMA INTELIGENTE DE CORTES (Object-Fit) ---
         function drawFlatBanner() {
@@ -1028,136 +1029,260 @@
         }
 
         function showToast(text, duration = 3000) {
-            toastText.innerText = text;
+            toastText.textContent = text;
             toastNotification.classList.remove('translate-x-96');
-            setTimeout(() => {
+
+            if (toastTimeoutId) clearTimeout(toastTimeoutId);
+
+            toastTimeoutId = setTimeout(() => {
                 toastNotification.classList.add('translate-x-96');
             }, duration);
         }
 
+        function safeSetText(element, text) {
+            if (!element) return;
+            element.textContent = text;
+        }
+
+        function normalizeText(value, maxLength = 300) {
+            return String(value || '').trim().slice(0, maxLength);
+        }
+
+        function createProjectId() {
+            return crypto.randomUUID
+                ? crypto.randomUUID()
+                : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+        }
+
+        async function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return;
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        function validateImageFile(file, maxSizeMB = 5) {
+            if (!file) return false;
+
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+
+            if (!allowedTypes.includes(file.type)) {
+                showToast('⚠️ Formato inválido. Use PNG, JPG ou WEBP.');
+                return false;
+            }
+
+            if (file.size > maxSizeMB * 1024 * 1024) {
+                showToast(`⚠️ Imagem muito grande. Máximo permitido: ${maxSizeMB}MB.`);
+                return false;
+            }
+
+            return true;
+        }
+
+        function loadImageFile(file, maxSizeMB = 5) {
+            return new Promise((resolve, reject) => {
+                if (!validateImageFile(file, maxSizeMB)) {
+                    reject(new Error('Arquivo de imagem inválido.'));
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('Não foi possível carregar a imagem.'));
+                    img.src = event.target.result;
+                };
+
+                reader.onerror = () => reject(new Error('Não foi possível ler o arquivo.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function estimateObjectSizeBytes(value) {
+            const json = JSON.stringify(value);
+
+            if (window.TextEncoder) {
+                return new TextEncoder().encode(json).length;
+            }
+
+            return new Blob([json]).size;
+        }
+
+        function assertFirestorePayloadSize(payload, maxBytes = 900 * 1024) {
+            const sizeBytes = estimateObjectSizeBytes(payload);
+
+            if (sizeBytes > maxBytes) {
+                throw new Error('Projeto muito grande para salvar no Firestore. Reduza o tamanho da arte ou use Firebase Storage.');
+            }
+        }
+
         // --- SISTEMA NEURAL FLUX 4K FOTOREALISTA ---
         async function executeAIDesignAgent(prompt) {
-            const query = prompt.toLowerCase().trim();
+            const query = normalizeText(prompt, 300).toLowerCase();
+
+            if (!query) {
+                showToast('⚠️ Escreva uma ideia para gerar a arte.');
+                return;
+            }
 
             canvasLoader.classList.remove('hidden');
             aiStatusBadge.className = "text-violet-400 flex items-center gap-1";
             aiStatusBadge.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Conectando ao Flux 4K...`;
-            aiThoughtLog.innerHTML = `<span class="typing">O processador de Elite FLUX 4K está a renderizar a tua obra-prima. Por favor aguarde...</span>`;
+            aiThoughtLog.classList.add('typing');
+            safeSetText(aiThoughtLog, 'O processador de Elite FLUX 4K está a renderizar a tua obra-prima. Por favor aguarde...');
 
-            // Prompt super detalhado em inglês para fotorealismo
+            // Prompt detalhado em inglês para aumentar fotorealismo.
             const queryEnglish = `masterpiece, ultra-detailed photography of ${query}, hyper-realistic, 8k resolution, perfect anatomical faces, cinematic lighting, sharp focus`;
 
-            const randomSeed = Math.floor(Math.random() * 999999);
+            const randomSeed = crypto.getRandomValues(new Uint32Array(1))[0] % 999999;
             const width = 1024;
             const height = 512;
 
-            // Força o modelo Flux!
+            // Força o modelo Flux.
             const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(queryEnglish)}?width=${width}&height=${height}&seed=${randomSeed}&nologo=true&model=flux`;
+            let objectUrl = null;
 
             try {
                 const response = await fetch(imageUrl);
+
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP ao gerar imagem: ${response.status}`);
+                }
+
+                const contentType = response.headers.get('content-type') || '';
+
+                if (contentType && !contentType.startsWith('image/')) {
+                    throw new Error('A resposta recebida não é uma imagem válida.');
+                }
+
                 const blob = await response.blob();
+                objectUrl = URL.createObjectURL(blob);
 
-                const img = new Image();
-                img.onload = function () {
-                    state.customFullBannerImage = img;
-                    state.customFullBannerName = null;
-                    state.theme = 'custom';
+                const img = await new Promise((resolve, reject) => {
+                    const generatedImage = new Image();
+                    generatedImage.onload = () => resolve(generatedImage);
+                    generatedImage.onerror = () => reject(new Error('Erro ao carregar a imagem gerada.'));
+                    generatedImage.src = objectUrl;
+                });
 
-                    // Esconde textos para não atrapalhar a arte 4K
-                    state.textLine1 = "";
-                    state.textLine2 = "";
-                    inputTextL1.value = "";
-                    inputTextL2.value = "";
+                state.customFullBannerImage = img;
+                state.customFullBannerName = null;
+                state.theme = 'custom';
 
-                    state.exteriorColor = '#121214';
-                    state.interiorColor = '#FFFFFF';
-                    colorExterior.value = state.exteriorColor;
-                    colorInterior.value = state.interiorColor;
+                // Esconde textos para não atrapalhar a arte 4K.
+                state.textLine1 = '';
+                state.textLine2 = '';
+                inputTextL1.value = '';
+                inputTextL2.value = '';
 
-                    canvasLoader.classList.add('hidden');
-                    aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
-                    aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
-                    aiThoughtLog.innerHTML = `Sucesso! Fotografia gerada: "${prompt}". A imagem foi perfeitamente enquadrada (sem achatamento).`;
+                state.exteriorColor = '#121214';
+                state.interiorColor = '#FFFFFF';
+                colorExterior.value = state.exteriorColor;
+                colorInterior.value = state.interiorColor;
 
-                    updateApp();
-                };
-                img.src = URL.createObjectURL(blob);
+                canvasLoader.classList.add('hidden');
+                aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
+                aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
+                aiThoughtLog.classList.remove('typing');
+                safeSetText(aiThoughtLog, `Sucesso! Fotografia gerada: "${normalizeText(prompt, 120)}". A imagem foi perfeitamente enquadrada sem achatamento.`);
+
+                updateApp();
             } catch (err) {
+                console.error('Falha ao gerar arte IA:', err);
                 canvasLoader.classList.add('hidden');
                 aiStatusBadge.className = "text-red-400 flex items-center gap-1";
                 aiStatusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Falha na Rede`;
-                aiThoughtLog.innerHTML = `Ocorreu um erro na renderização. Tente de novo!`;
+                aiThoughtLog.classList.remove('typing');
+                safeSetText(aiThoughtLog, 'Ocorreu um erro na renderização. Tente novamente em alguns instantes.');
+            } finally {
+                if (objectUrl) URL.revokeObjectURL(objectUrl);
             }
         }
 
         function getCompressedImageBase64(img, maxWidth = 800, quality = 0.6) {
             return new Promise((resolve) => {
                 if (!img) return resolve(null);
+
                 try {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     const scale = Math.min(1, maxWidth / img.width);
-                    canvas.width = img.width * scale;
-                    canvas.height = img.height * scale;
+
+                    canvas.width = Math.max(1, Math.round(img.width * scale));
+                    canvas.height = Math.max(1, Math.round(img.height * scale));
 
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                    resolve(compressedDataUrl);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
                 } catch (e) {
-                    console.error("Erro ao comprimir imagem:", e);
+                    console.error('Erro ao comprimir imagem:', e);
                     resolve(null);
                 }
             });
         }
 
         async function generateShareLink() {
-            showToast("⚡ A guardar no servidor...", 2000);
+            showToast('⚡ A guardar no servidor...', 2000);
+
             try {
                 let fullArtData = null;
 
                 if (state.customFullBannerImage) {
-                    fullArtData = await getCompressedImageBase64(state.customFullBannerImage, 800, 0.6);
+                    fullArtData = await getCompressedImageBase64(state.customFullBannerImage, 800, 0.58);
+                    if (!fullArtData) throw new Error('Falha ao comprimir a arte principal.');
                 }
 
                 let logoData = null;
+
                 if (state.customLogoImage) {
-                    logoData = await getCompressedImageBase64(state.customLogoImage, 300, 0.6);
+                    logoData = await getCompressedImageBase64(state.customLogoImage, 300, 0.65);
+                    if (!logoData) throw new Error('Falha ao comprimir o logo.');
                 }
 
                 const stateToSave = {
+                    schemaVersion: 1,
+                    createdAt: Date.now(),
                     finish: state.finish,
                     exteriorColor: state.exteriorColor,
                     interiorColor: state.interiorColor,
                     logoColor: state.logoColor,
                     logoScale: state.logoScale,
-                    textLine1: state.textLine1,
-                    textLine2: state.textLine2,
+                    textLine1: normalizeText(state.textLine1, 120),
+                    textLine2: normalizeText(state.textLine2, 120),
                     textColor: state.textColor,
                     fontFamily: state.fontFamily,
                     aiVectorShape: state.aiVectorShape,
-                    fullArtData: fullArtData,
-                    logoData: logoData
+                    fullArtData,
+                    logoData
                 };
 
-                const newId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+                assertFirestorePayloadSize(stateToSave);
 
-                await setDoc(doc(db, "projetos_canecas", newId), stateToSave);
+                const newId = createProjectId();
+
+                await setDoc(doc(db, 'projetos_canecas', newId), stateToSave);
 
                 const baseUrl = window.location.href.split('?')[0].split('#')[0];
                 const clientUrl = `${baseUrl}?id=${newId}`;
 
-                const dummyTextarea = document.createElement('textarea');
-                document.body.appendChild(dummyTextarea);
-                dummyTextarea.value = clientUrl;
-                dummyTextarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(dummyTextarea);
+                await copyToClipboard(clientUrl);
 
-                showToast("🔗 Link curto copiado com sucesso!");
+                showToast('🔗 Link curto copiado com sucesso!');
             } catch (err) {
-                console.error("Falha ao salvar no banco:", err);
-                showToast("❌ Erro ao guardar no servidor. Tente novamente.");
+                console.error('Falha ao salvar no banco:', err);
+                showToast(err.message || '❌ Erro ao guardar no servidor. Tente novamente.');
             }
         }
 
@@ -1268,7 +1393,7 @@
 
         document.querySelectorAll('.quick-prompt-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const text = e.target.innerText.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, "").trim();
+                const text = e.currentTarget.textContent.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, "").trim();
                 aiPromptText.value = text;
                 executeAIDesignAgent(text);
             });
@@ -1319,45 +1444,47 @@
             updateApp();
         });
 
-        inputCustomLogo.addEventListener('change', (e) => {
+        inputCustomLogo.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (file) {
+            if (!file) return;
+
+            try {
+                const img = await loadImageFile(file, 5);
+
                 state.customLogoName = file.name;
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    const img = new Image();
-                    img.onload = function () {
-                        state.customLogoImage = img;
-                        state.customFullBannerImage = null;
-                        state.customFullBannerName = null;
-                        uploadFeedback.classList.remove('hidden');
-                        uploadBannerFeedback.classList.add('hidden');
-                        updateApp();
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
+                state.customLogoImage = img;
+                state.customFullBannerImage = null;
+                state.customFullBannerName = null;
+
+                uploadFeedback.classList.remove('hidden');
+                uploadBannerFeedback.classList.add('hidden');
+                updateApp();
+            } catch (err) {
+                console.error('Falha ao carregar logo:', err);
+                inputCustomLogo.value = '';
+                showToast(err.message || '⚠️ Não foi possível carregar o logo.');
             }
         });
 
-        inputFullBanner.addEventListener('change', (e) => {
+        inputFullBanner.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (file) {
+            if (!file) return;
+
+            try {
+                const img = await loadImageFile(file, 8);
+
                 state.customFullBannerName = file.name;
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    const img = new Image();
-                    img.onload = function () {
-                        state.customFullBannerImage = img;
-                        state.customLogoImage = null;
-                        state.customLogoName = null;
-                        uploadBannerFeedback.classList.remove('hidden');
-                        uploadFeedback.classList.add('hidden');
-                        updateApp();
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
+                state.customFullBannerImage = img;
+                state.customLogoImage = null;
+                state.customLogoName = null;
+
+                uploadBannerFeedback.classList.remove('hidden');
+                uploadFeedback.classList.add('hidden');
+                updateApp();
+            } catch (err) {
+                console.error('Falha ao carregar arte completa:', err);
+                inputFullBanner.value = '';
+                showToast(err.message || '⚠️ Não foi possível carregar a arte.');
             }
         });
 
@@ -1393,6 +1520,7 @@
         });
 
         btnResetAngle.addEventListener('click', () => {
+            if (!camera || !orbitControls || !mugGroup) return;
             camera.position.set(0, 4, 18);
             orbitControls.target.set(0, 0, 0);
             orbitControls.update();
@@ -1408,6 +1536,11 @@
         });
 
         btnDownloadMockup.addEventListener('click', () => {
+            if (!renderer || !scene || !camera) {
+                showToast('⚠️ Preview 3D ainda não está pronto.');
+                return;
+            }
+
             renderer.render(scene, camera);
             const dataUrl = renderer.domElement.toDataURL('image/png');
             const link = document.createElement('a');
@@ -1564,8 +1697,8 @@
                         userProfileArea.classList.remove('hidden');
                         userProfileArea.classList.add('flex');
 
-                        userNameDisplay.innerText = user.displayName || user.email.split('@')[0];
-                        showToast(`👋 Bem-vindo(a), ${userNameDisplay.innerText}!`);
+                        userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
+                        showToast(`👋 Bem-vindo(a), ${userNameDisplay.textContent}!`);
 
                         // Inicializa o 3D (Se já estiver logado, não tem problema chamar de novo porque re-renderiza)
                         if (!scene) {
