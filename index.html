@@ -1151,12 +1151,14 @@
             aiThoughtLog.classList.add('typing');
             safeSetText(aiThoughtLog, 'O processador de Elite FLUX 4K está a renderizar a tua obra-prima. Por favor aguarde...');
 
-            // Prompt detalhado em inglês para aumentar fotorealismo.
-            const queryEnglish = `masterpiece, ultra-detailed photography of ${query}, hyper-realistic, 8k resolution, perfect anatomical faces, cinematic lighting, sharp focus`;
+            // Prompt orientado para o formato panorâmico do gabarito da caneca.
+            const queryEnglish = `masterpiece, ultra-detailed wide panoramic composition of ${query}, designed for a mug wrap template, horizontal banner format, hyper-realistic, 8k resolution, perfect anatomical faces, cinematic lighting, sharp focus`;
 
             const randomSeed = crypto.getRandomValues(new Uint32Array(1))[0] % 999999;
-            const width = 1024;
-            const height = 512;
+
+            // Gera a imagem já na mesma proporção do gabarito 205x92mm.
+            const width = 1025;
+            const height = 460;
 
             // Força o modelo Flux.
             const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(queryEnglish)}?width=${width}&height=${height}&seed=${randomSeed}&nologo=true&model=flux`;
