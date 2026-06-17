@@ -185,7 +185,7 @@
 
             <section id="previewSection" class="lg:col-span-6 flex flex-col gap-6 transition-all duration-500">
 
-                <div class="relative bg-gradient-to-b from-[#14121F] to-[#0A0811] rounded-3xl border border-violet-950/20 shadow-2xl overflow-hidden group flex flex-col justify-between p-6 lg:sticky lg:top-24"
+                <div class="relative bg-gradient-to-b from-[#14121F] to-[#0A0811] rounded-3xl border border-violet-950/20 shadow-2xl overflow-hidden group flex flex-col justify-between p-6 lg:sticky lg:top-6"
                     style="height: 520px;">
 
                     <div class="absolute top-4 left-4 z-10 flex flex-col gap-1.5 pointer-events-none">
@@ -378,38 +378,6 @@
                                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                     <div>
                                         <span class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
-                                            <i class="fa-solid fa-image"></i> UPLOAD PARA O DIRETOR DE ARTE
-                                        </span>
-                                        <p class="text-[10px] text-gray-500 mt-1">Envie uma foto e peça uma edição como caricatura, anime, HQ, vetor ou estilo Paul Rand.</p>
-                                    </div>
-                                    <button id="btnClearAgentReference"
-                                        class="text-[10px] text-gray-300 hover:text-white bg-black/40 border border-white/10 hover:border-red-500/40 px-3 py-2 rounded-xl transition-all self-start sm:self-auto">
-                                        <i class="fa-solid fa-trash-can"></i> Limpar imagem
-                                    </button>
-                                </div>
-
-                                
-
-                                <div class="flex items-center justify-between gap-2">
-                                    <div id="uploadAgentReferenceFeedback" class="hidden text-[10px] text-green-400 font-mono">
-                                        <i class="fa-solid fa-circle-check"></i> Imagem carregada para edição com o agente!
-                                    </div>
-                                    <span class="text-[10px] text-gray-500 ml-auto">Sugestões: “faça uma caricatura”, “estilo HQ”, “visual vetorial”, “Paul Rand”.</span>
-                                </div>
-
-                                <div class="flex flex-wrap gap-2">
-                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="transforme a foto em caricatura divertida com traços expressivos e visual ilustrado">Caricatura</button>
-                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="transforme a foto em estilo anime com linhas limpas e cores vibrantes">Anime</button>
-                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="transforme a foto em estilo HQ com contraste forte e visual de quadrinhos">HQ</button>
-                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="converta a imagem para uma linguagem vetorial limpa com aparência de identidade visual">Vetor</button>
-                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="aplique estilo Paul Rand com linguagem modernista, formas geométricas e espaço negativo">Paul Rand</button>
-                                </div>
-                            </div>
-
-                            <div class="bg-black/35 border border-violet-500/20 rounded-2xl p-4 flex flex-col gap-4">
-                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                    <div>
-                                        <span class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
                                             <i class="fa-solid fa-crop-simple"></i> ENQUADRAMENTO PROFISSIONAL
                                         </span>
                                         <p class="text-[10px] text-gray-500 mt-1">Ajuste a arte no gabarito antes de enviar ao cliente.</p>
@@ -503,24 +471,6 @@
 
                     <div id="panelManual" class="hidden flex flex-col gap-5">
 
-                        <div
-                            class="bg-gradient-to-r from-violet-600/10 to-indigo-600/10 rounded-2xl p-4 border border-violet-500/30 flex flex-col gap-3">
-                            <span
-                                class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
-                                <i class="fa-solid fa-cloud-arrow-up text-sm"></i> ENVIAR ARTE COMPLETA (GABARITO
-                                205x92mm)
-                            </span>
-                            
-                            <div class="flex items-center justify-between gap-2 mt-1">
-                                <div id="uploadBannerFeedback" class="hidden text-[10px] text-green-400 font-mono"><i
-                                        class="fa-solid fa-circle-check"></i> Arte de sublimação aplicada!</div>
-                                <button id="btnResetFullBanner"
-                                    class="text-[10px] text-red-400 hover:text-red-300 font-mono flex items-center gap-1 transition-all ml-auto">
-                                    <i class="fa-solid fa-trash-can"></i> Limpar / Voltar ao Editor
-                                </button>
-                            </div>
-                        </div>
-
                         <div class="grid grid-cols-2 gap-4 bg-black/30 p-4 rounded-2xl border border-white/5">
                             <div>
                                 <label class="block text-xs font-medium mb-1.5 text-gotham-light">PORCELANA
@@ -545,16 +495,7 @@
                         </div>
 
                         <div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex flex-col gap-4">
-                            <span class="text-xs font-mono tracking-wider font-bold text-violet-400">LADO A: LOGOTIPO OU
-                                IMAGEM</span>
-
-                            <div class="p-3 bg-black/40 rounded-xl border border-white/10">
-                                <label class="block text-xs font-medium mb-1.5 text-violet-300"><i
-                                        class="fa-solid fa-upload"></i> CARREGAR LOGO/PNG:</label>
-                                
-                                <div id="uploadFeedback" class="hidden mt-2 text-[10px] text-green-400 font-mono"><i
-                                        class="fa-solid fa-circle-check"></i> Logo carregado!</div>
-                            </div>
+                            <span class="text-xs font-mono tracking-wider font-bold text-violet-400">LADO A: SÍMBOLO / MARCA</span>
 
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -814,9 +755,9 @@
         const aiThoughtLog = document.getElementById('aiThoughtLog');
         const aiStatusBadge = document.getElementById('aiStatusBadge');
 
-        const 
+        const inputCustomLogo = document.getElementById('inputCustomLogo');
         const uploadFeedback = document.getElementById('uploadFeedback');
-        const 
+        const inputFullBanner = document.getElementById('inputFullBanner');
         const btnResetFullBanner = document.getElementById('btnResetFullBanner');
         const uploadBannerFeedback = document.getElementById('uploadBannerFeedback');
 
@@ -1352,7 +1293,17 @@
             return baseY - 0.12;
         }
 
+        const VALID_PRODUCT_TYPES = ['mugClassic', 'mugSlim', 'bottle'];
+
+        function ensureValidProductType() {
+            if (!VALID_PRODUCT_TYPES.includes(state.productType)) {
+                state.productType = 'mugClassic';
+                if (selectProductType) selectProductType.value = state.productType;
+            }
+        }
+
         function createProductModel() {
+            ensureValidProductType();
             if (!scene || !canvasTexture) return;
             clearCurrentProductModel();
             syncCanvasTextureTransform();
@@ -1570,7 +1521,14 @@
                     return;
                 }
 
-                const reader = new ;
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('Não foi possível carregar a imagem.'));
+                    img.src = event.target.result;
+                };
 
                 reader.onerror = () => reject(new Error('Não foi possível ler o arquivo.'));
                 reader.readAsDataURL(file);
@@ -1590,7 +1548,7 @@
             resetImageTransform();
 
             if (selectImageFitMode) selectImageFitMode.value = state.imageFitMode;
-            if (uploadAgentReferenceFeedback) uploadAgentReferenceFeedback.classList.remove('hidden');
+            if (uploadAgentReferenceFeedback) uploadAgentReferenceFeedback?.classList.remove('hidden');
             uploadBannerFeedback?.classList.add('hidden');
             uploadFeedback?.classList.add('hidden');
 
@@ -1607,7 +1565,7 @@
             state.agentReferenceImageName = null;
 
             if (inputAgentReference) inputAgentReference.value = '';
-            if (uploadAgentReferenceFeedback) uploadAgentReferenceFeedback.classList.add('hidden');
+            if (uploadAgentReferenceFeedback) uploadAgentReferenceFeedback?.classList.add('hidden');
 
             if (currentIsAgentImage) {
                 state.customFullBannerImage = null;
@@ -2257,7 +2215,8 @@
             updateApp();
         });
 
-        
+        inputCustomLogo?.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
             if (!file) return;
 
             try {
@@ -2268,17 +2227,18 @@
                 state.customFullBannerImage = null;
                 state.customFullBannerName = null;
 
-                uploadFeedback.classList.remove('hidden');
-                uploadBannerFeedback.classList.add('hidden');
+                uploadFeedback?.classList.remove('hidden');
+                uploadBannerFeedback?.classList.add('hidden');
                 updateApp();
             } catch (err) {
                 console.error('Falha ao carregar logo:', err);
-                
+                if (inputCustomLogo) inputCustomLogo.value = '';
                 showToast(err.message || '⚠️ Não foi possível carregar o logo.');
             }
         });
 
-        
+        inputFullBanner?.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
             if (!file) return;
 
             try {
@@ -2291,28 +2251,28 @@
                 resetImageAdjustments();
                 resetImageTransform();
 
-                uploadBannerFeedback.classList.remove('hidden');
-                uploadFeedback.classList.add('hidden');
+                uploadBannerFeedback?.classList.remove('hidden');
+                uploadFeedback?.classList.add('hidden');
                 updateApp();
             } catch (err) {
                 console.error('Falha ao carregar arte completa:', err);
-                
+                if (inputFullBanner) inputFullBanner.value = '';
                 showToast(err.message || '⚠️ Não foi possível carregar a arte.');
             }
         });
 
-        btnResetFullBanner.addEventListener('click', () => {
+        btnResetFullBanner?.addEventListener('click', () => {
             state.customFullBannerImage = null;
             state.customFullBannerName = null;
             resetImageAdjustments();
             resetImageTransform();
-            
-            uploadBannerFeedback.classList.add('hidden');
+            if (inputFullBanner) inputFullBanner.value = '';
+            uploadBannerFeedback?.classList.add('hidden');
             updateApp();
         });
 
         selectProductType?.addEventListener('change', (e) => {
-            state.productType = e.target.value;
+            state.productType = VALID_PRODUCT_TYPES.includes(e.target.value) ? e.target.value : 'mugClassic';
             createProductModel();
             updateApp();
             showToast('🧩 Mockup alterado com sucesso.');
@@ -2437,11 +2397,11 @@
             colorText.value = '#000000';
             inputTextL1.value = '';
             inputTextL2.value = '';
-            
-            
+            if (inputCustomLogo) inputCustomLogo.value = '';
+            if (inputFullBanner) inputFullBanner.value = '';
 
-            uploadFeedback.classList.add('hidden');
-            uploadBannerFeedback.classList.add('hidden');
+            uploadFeedback?.classList.add('hidden');
+            uploadBannerFeedback?.classList.add('hidden');
 
             updateApp();
         });
