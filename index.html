@@ -894,8 +894,14 @@
             mugGroup = new THREE.Group();
             scene.add(mugGroup);
 
-            const radius = 3.5;
+            // Ajuste de proporção do mockup 3D para casar com o gabarito 205x92mm.
+            // Sem isso, a arte fica horizontalmente esticada na caneca.
+            const TEMPLATE_WIDTH_MM = 205;
+            const TEMPLATE_HEIGHT_MM = 92;
+            const templateAspect = TEMPLATE_WIDTH_MM / TEMPLATE_HEIGHT_MM;
+
             const heightMug = 8.6;
+            const radius = (templateAspect * heightMug) / (2 * Math.PI);
             const hHalf = heightMug / 2;
             const thickness = 0.24;
 
@@ -964,7 +970,8 @@
                 clearcoatRoughness: 0.08
             });
             mugHandleMesh = new THREE.Mesh(handleGeo, handleMat);
-            mugHandleMesh.position.set(-2.7, 0, 0);
+            // Mantém a alça encostada corretamente após o ajuste do raio.
+            mugHandleMesh.position.set(-(radius - 0.8), 0, 0);
             mugHandleMesh.rotation.z = Math.PI / 2;
             mugHandleMesh.castShadow = true;
             mugGroup.add(mugHandleMesh);
@@ -1171,44 +1178,49 @@
                 const blob = await response.blob();
                 objectUrl = URL.createObjectURL(blob);
 
-                const img = await new Promise((resolve, reject) => {
-                    const generatedImage = new Image();
-                    generatedImage.onload = () => resolve(generatedImage);
-                    generatedImage.onerror = () => reject(new Error('Erro ao carregar a imagem gerada.'));
-                    generatedImage.src = objectUrl;
-                });
+                const img = new Image();
 
-                state.customFullBannerImage = img;
-                state.customFullBannerName = null;
-                state.theme = 'custom';
+                img.onload = function () {
+                    if (objectUrl) URL.revokeObjectURL(objectUrl);
 
-                // Esconde textos para não atrapalhar a arte 4K.
-                state.textLine1 = '';
-                state.textLine2 = '';
-                inputTextL1.value = '';
-                inputTextL2.value = '';
+                    state.customFullBannerImage = img;
+                    state.customFullBannerName = null;
+                    state.theme = 'custom';
 
-                state.exteriorColor = '#121214';
-                state.interiorColor = '#FFFFFF';
-                colorExterior.value = state.exteriorColor;
-                colorInterior.value = state.interiorColor;
+                    // Esconde textos para não atrapalhar a arte 4K.
+                    state.textLine1 = '';
+                    state.textLine2 = '';
+                    inputTextL1.value = '';
+                    inputTextL2.value = '';
 
-                canvasLoader.classList.add('hidden');
-                aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
-                aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
-                aiThoughtLog.classList.remove('typing');
-                safeSetText(aiThoughtLog, `Sucesso! Fotografia gerada: "${normalizeText(prompt, 120)}". A imagem foi perfeitamente enquadrada sem achatamento.`);
+                    state.exteriorColor = '#121214';
+                    state.interiorColor = '#FFFFFF';
+                    colorExterior.value = state.exteriorColor;
+                    colorInterior.value = state.interiorColor;
 
-                updateApp();
+                    canvasLoader.classList.add('hidden');
+                    aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
+                    aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
+                    aiThoughtLog.classList.remove('typing');
+                    safeSetText(aiThoughtLog, `Sucesso! Fotografia gerada: "${normalizeText(prompt, 120)}". A imagem foi perfeitamente enquadrada sem achatamento.`);
+
+                    updateApp();
+                };
+
+                img.onerror = function () {
+                    if (objectUrl) URL.revokeObjectURL(objectUrl);
+                    throw new Error('Erro ao carregar a imagem gerada.');
+                };
+
+                img.src = objectUrl;
             } catch (err) {
+                if (objectUrl) URL.revokeObjectURL(objectUrl);
                 console.error('Falha ao gerar arte IA:', err);
                 canvasLoader.classList.add('hidden');
                 aiStatusBadge.className = "text-red-400 flex items-center gap-1";
                 aiStatusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Falha na Rede`;
                 aiThoughtLog.classList.remove('typing');
                 safeSetText(aiThoughtLog, 'Ocorreu um erro na renderização. Tente novamente em alguns instantes.');
-            } finally {
-                if (objectUrl) URL.revokeObjectURL(objectUrl);
             }
         }
 
