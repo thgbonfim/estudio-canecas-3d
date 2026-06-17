@@ -302,17 +302,60 @@
 
                         <div class="flex flex-col gap-2">
                             <label class="text-xs font-mono text-gray-400 flex justify-between">
-                                <span>INSIRA O SEU DESEJO CRIATIVO:</span>
-                                <span class="text-violet-400 font-bold">PROMPT NEURAL</span>
+                                <span>DESCREVA A ARTE OU A EDIÇÃO:</span>
+                                <span class="text-violet-400 font-bold">SUPER AGENTE CG</span>
                             </label>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-1">Especialidade visual:</label>
+                                    <select id="selectCGStyle"
+                                        class="w-full bg-black/40 border border-violet-500/30 text-white rounded-xl p-3 text-xs focus:outline-none focus:border-violet-500">
+                                        <option value="photorealistic">Fotorealista Premium</option>
+                                        <option value="product">Produto / Publicidade</option>
+                                        <option value="cinematic">Cinematográfico</option>
+                                        <option value="vector">Vetor / Logo Limpo</option>
+                                        <option value="anime">Anime / Ilustração</option>
+                                        <option value="comic">HQ / Graphic Novel</option>
+                                        <option value="luxury">Luxo / Premium</option>
+                                        <option value="neon">Neon / Cyberpunk</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-1">Encaixe no gabarito:</label>
+                                    <select id="selectImageFitMode"
+                                        class="w-full bg-black/40 border border-violet-500/30 text-white rounded-xl p-3 text-xs focus:outline-none focus:border-violet-500">
+                                        <option value="cover">Preencher sem deformar</option>
+                                        <option value="contain">Mostrar imagem inteira</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="relative">
-                                <textarea id="aiPromptText" rows="3"
-                                    class="w-full bg-black/40 border ai-glow-border rounded-2xl p-4 text-sm text-white focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all placeholder-gray-600 font-medium"
-                                    placeholder="Ex: Fotografia ultra realista do Neymar jogando futebol no meio de uma tempestade, resolução 8K..."></textarea>
-                                <button id="btnGenerateAI"
-                                    class="absolute bottom-4 right-4 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-violet-600/30 transition-all flex items-center gap-1.5">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Desenhar Arte
+                                <textarea id="aiPromptText" rows="4"
+                                    class="w-full bg-black/40 border ai-glow-border rounded-2xl p-4 pr-4 pb-20 text-sm text-white focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all placeholder-gray-600 font-medium"
+                                    placeholder="Ex: desenhe uma Ferrari vermelha em cidade neon, estilo cinematográfico, com espaço limpo nas laterais. Ou: edite a arte atual deixando mais contraste, mais saturação e visual premium."></textarea>
+                                <div class="absolute bottom-4 right-4 flex flex-wrap justify-end gap-2">
+                                    <button id="btnEditAI"
+                                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-1.5">
+                                        <i class="fa-solid fa-pen-nib"></i> Editar Arte
+                                    </button>
+                                    <button id="btnGenerateAI"
+                                        class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-violet-600/30 transition-all flex items-center gap-1.5">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Desenhar Nova
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2">
+                                <button id="btnResetImageEdits"
+                                    class="text-[10px] text-gray-300 hover:text-white bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all">
+                                    <i class="fa-solid fa-rotate-left"></i> Resetar Edição
                                 </button>
+                                <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="deixe a arte mais nítida, com mais contraste e saturação premium">Auto melhorar</button>
+                                <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="aplique visual cinematográfico com contraste alto e cores mais intensas">Cinemático</button>
+                                <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="aplique visual neon cyberpunk com saturação alta">Neon</button>
+                                <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="mostrar imagem inteira no gabarito sem cortar">Sem cortar</button>
                             </div>
                         </div>
 
@@ -608,7 +651,18 @@
             fontFamily: 'Bebas Neue',
             bgStyle: 'tech-grid',
             isAutoRotating: false,
-            aiVectorShape: 'batman-sigil'
+            aiVectorShape: 'batman-sigil',
+            imageFitMode: 'cover',
+            imageAdjustments: {
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                hue: 0,
+                blur: 0,
+                grayscale: 0,
+                sepia: 0
+            },
+            cgStylePreset: 'photorealistic'
         };
 
         const bannerCanvas = document.getElementById('bannerCanvas');
@@ -633,6 +687,10 @@
         const panelAI = document.getElementById('panelAI');
         const panelManual = document.getElementById('panelManual');
         const btnGenerateAI = document.getElementById('btnGenerateAI');
+        const btnEditAI = document.getElementById('btnEditAI');
+        const btnResetImageEdits = document.getElementById('btnResetImageEdits');
+        const selectCGStyle = document.getElementById('selectCGStyle');
+        const selectImageFitMode = document.getElementById('selectImageFitMode');
         const aiPromptText = document.getElementById('aiPromptText');
         const aiThoughtLog = document.getElementById('aiThoughtLog');
         const aiStatusBadge = document.getElementById('aiStatusBadge');
@@ -685,6 +743,61 @@
         let toastTimeoutId;
 
         // --- SISTEMA INTELIGENTE DE CORTES (Object-Fit) ---
+        function getCanvasImageFilter() {
+            const adj = state.imageAdjustments || {};
+            const brightness = adj.brightness ?? 100;
+            const contrast = adj.contrast ?? 100;
+            const saturation = adj.saturation ?? 100;
+            const hue = adj.hue ?? 0;
+            const blur = adj.blur ?? 0;
+            const grayscale = adj.grayscale ?? 0;
+            const sepia = adj.sepia ?? 0;
+
+            return [
+                `brightness(${brightness}%)`,
+                `contrast(${contrast}%)`,
+                `saturate(${saturation}%)`,
+                `hue-rotate(${hue}deg)`,
+                `blur(${blur}px)`,
+                `grayscale(${grayscale}%)`,
+                `sepia(${sepia}%)`
+            ].join(' ');
+        }
+
+        function getImageDrawBox(img, targetW, targetH, fitMode = 'cover') {
+            const canvasRatio = targetW / targetH;
+            const imgRatio = img.width / img.height;
+
+            let drawW = targetW;
+            let drawH = targetH;
+            let offsetX = 0;
+            let offsetY = 0;
+
+            if (fitMode === 'contain') {
+                if (imgRatio > canvasRatio) {
+                    drawW = targetW;
+                    drawH = targetW / imgRatio;
+                    offsetY = (targetH - drawH) / 2;
+                } else {
+                    drawH = targetH;
+                    drawW = targetH * imgRatio;
+                    offsetX = (targetW - drawW) / 2;
+                }
+
+                return { drawW, drawH, x: offsetX, y: offsetY };
+            }
+
+            if (imgRatio > canvasRatio) {
+                drawW = targetH * imgRatio;
+                offsetX = (drawW - targetW) / 2;
+            } else {
+                drawH = targetW / imgRatio;
+                offsetY = (drawH - targetH) / 2;
+            }
+
+            return { drawW, drawH, x: -offsetX, y: -offsetY };
+        }
+
         function drawFlatBanner() {
             const w = bannerCanvas.width;
             const h = bannerCanvas.height;
@@ -698,29 +811,19 @@
 
             if (state.customFullBannerImage) {
                 const img = state.customFullBannerImage;
-
-                const canvasRatio = printW / h;
-                const imgRatio = img.width / img.height;
-
-                let drawW = printW;
-                let drawH = h;
-                let offsetX = 0;
-                let offsetY = 0;
-
-                if (imgRatio > canvasRatio) {
-                    drawW = h * imgRatio;
-                    offsetX = (drawW - printW) / 2;
-                } else {
-                    drawH = printW / imgRatio;
-                    offsetY = (drawH - h) / 2;
-                }
+                const box = getImageDrawBox(img, printW, h, state.imageFitMode);
 
                 bannerCtx.save();
                 bannerCtx.beginPath();
                 bannerCtx.rect(marginX, 0, printW, h);
                 bannerCtx.clip();
 
-                bannerCtx.drawImage(img, marginX - offsetX, -offsetY, drawW, drawH);
+                bannerCtx.fillStyle = state.exteriorColor || '#FFFFFF';
+                bannerCtx.fillRect(marginX, 0, printW, h);
+
+                bannerCtx.filter = getCanvasImageFilter();
+                bannerCtx.drawImage(img, marginX + box.x, box.y, box.drawW, box.drawH);
+                bannerCtx.filter = 'none';
 
                 bannerCtx.restore();
             } else {
@@ -894,14 +997,8 @@
             mugGroup = new THREE.Group();
             scene.add(mugGroup);
 
-            // Ajuste de proporção do mockup 3D para casar com o gabarito 205x92mm.
-            // Sem isso, a arte fica horizontalmente esticada na caneca.
-            const TEMPLATE_WIDTH_MM = 205;
-            const TEMPLATE_HEIGHT_MM = 92;
-            const templateAspect = TEMPLATE_WIDTH_MM / TEMPLATE_HEIGHT_MM;
-
+            const radius = 3.5;
             const heightMug = 8.6;
-            const radius = (templateAspect * heightMug) / (2 * Math.PI);
             const hHalf = heightMug / 2;
             const thickness = 0.24;
 
@@ -970,8 +1067,7 @@
                 clearcoatRoughness: 0.08
             });
             mugHandleMesh = new THREE.Mesh(handleGeo, handleMat);
-            // Mantém a alça encostada corretamente após o ajuste do raio.
-            mugHandleMesh.position.set(-(radius - 0.8), 0, 0);
+            mugHandleMesh.position.set(-2.7, 0, 0);
             mugHandleMesh.rotation.z = Math.PI / 2;
             mugHandleMesh.castShadow = true;
             mugGroup.add(mugHandleMesh);
@@ -1136,9 +1232,168 @@
             }
         }
 
+
+        const CG_STYLE_PRESETS = {
+            photorealistic: 'photorealistic premium commercial artwork, realistic textures, accurate lighting, sharp details',
+            product: 'professional product advertising composition, clean layout, premium branding, high-end studio lighting',
+            cinematic: 'cinematic composition, dramatic lighting, color graded, high contrast, depth of field, movie poster quality',
+            vector: 'clean vector-style graphic, crisp edges, balanced negative space, logo-ready composition, no visual noise',
+            anime: 'high-quality anime illustration, dynamic composition, clean linework, vibrant colors, polished digital art',
+            comic: 'modern graphic novel style, bold composition, clean ink lines, cinematic shadows, premium comic cover art',
+            luxury: 'luxury premium design, elegant contrast, refined colors, sophisticated commercial artwork',
+            neon: 'neon cyberpunk artwork, vibrant lights, futuristic city glow, high contrast, glossy reflections'
+        };
+
+        const NEGATIVE_PROMPT = 'distorted, stretched, warped, low quality, blurry, deformed, bad anatomy, extra fingers, duplicate face, watermark, logo, text artifacts, cropped subject, broken composition';
+
+        function clampNumber(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function resetImageAdjustments() {
+            state.imageAdjustments = {
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                hue: 0,
+                blur: 0,
+                grayscale: 0,
+                sepia: 0
+            };
+        }
+
+        function applyImageEditCommand(command) {
+            const text = normalizeText(command, 500).toLowerCase();
+
+            if (!text) {
+                showToast('⚠️ Descreva o que deseja editar na arte.');
+                return;
+            }
+
+            if (!state.customFullBannerImage) {
+                showToast('⚠️ Primeiro gere ou envie uma arte para editar.');
+                return;
+            }
+
+            const adj = { ...state.imageAdjustments };
+            const actions = [];
+
+            if (/(reset|resetar|original|normal|remover edição|sem filtro)/.test(text)) {
+                resetImageAdjustments();
+                state.imageFitMode = 'cover';
+                if (selectImageFitMode) selectImageFitMode.value = state.imageFitMode;
+                updateApp();
+                safeSetText(aiThoughtLog, 'Edição resetada. A arte voltou para o tratamento visual original.');
+                showToast('↩️ Edição resetada.');
+                return;
+            }
+
+            if (/(sem cortar|imagem inteira|mostrar tudo|inteira|não cortar|nao cortar|contain)/.test(text)) {
+                state.imageFitMode = 'contain';
+                if (selectImageFitMode) selectImageFitMode.value = 'contain';
+                actions.push('encaixe alterado para mostrar a imagem inteira');
+            }
+
+            if (/(preencher|cobrir|sem borda|ocupar tudo|cover)/.test(text)) {
+                state.imageFitMode = 'cover';
+                if (selectImageFitMode) selectImageFitMode.value = 'cover';
+                actions.push('encaixe alterado para preencher o gabarito sem deformar');
+            }
+
+            if (/(mais brilho|clarear|claro|iluminar|brilhante)/.test(text)) {
+                adj.brightness = clampNumber(adj.brightness + 12, 50, 160);
+                actions.push('brilho aumentado');
+            }
+
+            if (/(menos brilho|escurecer|mais escuro|escuro)/.test(text)) {
+                adj.brightness = clampNumber(adj.brightness - 12, 50, 160);
+                actions.push('brilho reduzido');
+            }
+
+            if (/(contraste|mais impacto|impactante|nítid|nitid|definid|premium|auto melhorar|melhorar)/.test(text)) {
+                adj.contrast = clampNumber(adj.contrast + 18, 60, 180);
+                adj.saturation = clampNumber(adj.saturation + 10, 50, 190);
+                actions.push('contraste e presença visual reforçados');
+            }
+
+            if (/(saturação|saturacao|cor forte|cores fortes|vibrante|intenso|neon|cyberpunk)/.test(text)) {
+                adj.saturation = clampNumber(adj.saturation + 22, 40, 220);
+                actions.push('saturação aumentada');
+            }
+
+            if (/(menos saturação|menos saturacao|suavizar cor|cores suaves|pastel)/.test(text)) {
+                adj.saturation = clampNumber(adj.saturation - 22, 40, 220);
+                actions.push('saturação reduzida');
+            }
+
+            if (/(cinematográfico|cinematic|cinema|filme|dramático|dramatico)/.test(text)) {
+                adj.contrast = clampNumber(adj.contrast + 24, 60, 190);
+                adj.saturation = clampNumber(adj.saturation + 8, 40, 180);
+                adj.brightness = clampNumber(adj.brightness - 4, 50, 150);
+                actions.push('color grading cinematográfico aplicado');
+            }
+
+            if (/(preto e branco|pb|p&b|grayscale|cinza)/.test(text)) {
+                adj.grayscale = 100;
+                adj.sepia = 0;
+                actions.push('preto e branco aplicado');
+            }
+
+            if (/(sépia|sepia|vintage|retrô|retro)/.test(text)) {
+                adj.sepia = 70;
+                adj.grayscale = 0;
+                adj.contrast = clampNumber(adj.contrast + 8, 60, 170);
+                actions.push('efeito vintage/sépia aplicado');
+            }
+
+            if (/(desfocar|blur|suavizar fundo|menos nítido|menos nitido)/.test(text)) {
+                adj.blur = clampNumber(adj.blur + 0.8, 0, 4);
+                actions.push('suavização/desfoque leve aplicado');
+            }
+
+            if (/(tirar desfoque|remover blur|mais foco|mais nítido|mais nitido)/.test(text)) {
+                adj.blur = clampNumber(adj.blur - 0.8, 0, 4);
+                adj.contrast = clampNumber(adj.contrast + 10, 60, 190);
+                actions.push('foco visual reforçado');
+            }
+
+            state.imageAdjustments = adj;
+
+            if (!actions.length) {
+                adj.contrast = clampNumber(adj.contrast + 10, 60, 180);
+                adj.saturation = clampNumber(adj.saturation + 8, 40, 190);
+                state.imageAdjustments = adj;
+                actions.push('melhoria geral aplicada');
+            }
+
+            updateApp();
+
+            const summary = `Super Agente CG editou a arte: ${actions.join(', ')}.`;
+            safeSetText(aiThoughtLog, summary);
+            aiStatusBadge.className = 'text-emerald-400 flex items-center gap-1';
+            aiStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte editada';
+            showToast('🎨 Arte editada pelo agente.');
+        }
+
+        function buildCGPrompt(userPrompt) {
+            const cleanPrompt = normalizeText(userPrompt, 800);
+            const style = CG_STYLE_PRESETS[state.cgStylePreset] || CG_STYLE_PRESETS.photorealistic;
+
+            return [
+                `masterpiece, ${style}`,
+                `subject: ${cleanPrompt}`,
+                'designed specifically for a full mug wrap sublimation template',
+                'wide panoramic horizontal banner composition',
+                'safe center composition, important subject away from the left and right handle gap',
+                'balanced layout, no stretching, no distortion, preserve natural proportions',
+                'print-ready artwork, high resolution, crisp details',
+                `negative prompt: ${NEGATIVE_PROMPT}`
+            ].join(', ');
+        }
+
         // --- SISTEMA NEURAL FLUX 4K FOTOREALISTA ---
         async function executeAIDesignAgent(prompt) {
-            const query = normalizeText(prompt, 300).toLowerCase();
+            const query = normalizeText(prompt, 800);
 
             if (!query) {
                 showToast('⚠️ Escreva uma ideia para gerar a arte.');
@@ -1151,12 +1406,12 @@
             aiThoughtLog.classList.add('typing');
             safeSetText(aiThoughtLog, 'O processador de Elite FLUX 4K está a renderizar a tua obra-prima. Por favor aguarde...');
 
-            // Prompt orientado para o formato panorâmico do gabarito da caneca.
-            const queryEnglish = `masterpiece, ultra-detailed wide panoramic composition of ${query}, designed for a mug wrap template, horizontal banner format, hyper-realistic, 8k resolution, perfect anatomical faces, cinematic lighting, sharp focus`;
+            // Super prompt técnico do agente especialista em computação gráfica.
+            const queryEnglish = buildCGPrompt(query);
 
             const randomSeed = crypto.getRandomValues(new Uint32Array(1))[0] % 999999;
 
-            // Gera a imagem já na mesma proporção do gabarito 205x92mm.
+            // Mantém a geração na proporção exata do gabarito 205x92mm.
             const width = 1025;
             const height = 460;
 
@@ -1188,6 +1443,8 @@
                     state.customFullBannerImage = img;
                     state.customFullBannerName = null;
                     state.theme = 'custom';
+                    state.imageFitMode = selectImageFitMode?.value || 'cover';
+                    resetImageAdjustments();
 
                     // Esconde textos para não atrapalhar a arte 4K.
                     state.textLine1 = '';
@@ -1204,7 +1461,7 @@
                     aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
                     aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
                     aiThoughtLog.classList.remove('typing');
-                    safeSetText(aiThoughtLog, `Sucesso! Fotografia gerada: "${normalizeText(prompt, 120)}". A imagem foi perfeitamente enquadrada sem achatamento.`);
+                    safeSetText(aiThoughtLog, `Super Agente CG criou uma arte print-ready para caneca: "${normalizeText(prompt, 120)}". Proporção 205x92mm preservada, composição panorâmica e sem achatamento.`);
 
                     updateApp();
                 };
@@ -1278,6 +1535,9 @@
                     textColor: state.textColor,
                     fontFamily: state.fontFamily,
                     aiVectorShape: state.aiVectorShape,
+                    imageFitMode: state.imageFitMode,
+                    imageAdjustments: state.imageAdjustments,
+                    cgStylePreset: state.cgStylePreset,
                     fullArtData,
                     logoData
                 };
@@ -1349,6 +1609,12 @@
                 state.textColor = savedState.textColor || '#FFD700';
                 state.fontFamily = savedState.fontFamily || 'Bebas Neue';
                 state.aiVectorShape = savedState.aiVectorShape || 'batman-sigil';
+                state.imageFitMode = savedState.imageFitMode || 'cover';
+                state.imageAdjustments = savedState.imageAdjustments || state.imageAdjustments;
+                state.cgStylePreset = savedState.cgStylePreset || state.cgStylePreset;
+
+                if (selectImageFitMode) selectImageFitMode.value = state.imageFitMode;
+                if (selectCGStyle) selectCGStyle.value = state.cgStylePreset;
 
                 if (state.finish === 'matte') {
                     btnFinishMatte.className = "py-1 px-3 rounded-lg border border-violet-500/50 text-violet-300 bg-violet-500/10 font-bold text-[11px] transition-all";
@@ -1416,6 +1682,48 @@
         btnGenerateAI.addEventListener('click', () => {
             if (aiPromptText.value.trim() === '') return;
             executeAIDesignAgent(aiPromptText.value);
+        });
+
+        if (btnEditAI) {
+            btnEditAI.addEventListener('click', () => {
+                applyImageEditCommand(aiPromptText.value);
+            });
+        }
+
+        if (btnResetImageEdits) {
+            btnResetImageEdits.addEventListener('click', () => {
+                resetImageAdjustments();
+                state.imageFitMode = 'cover';
+                if (selectImageFitMode) selectImageFitMode.value = 'cover';
+                updateApp();
+                safeSetText(aiThoughtLog, 'Edição visual resetada. A arte voltou para o tratamento original.');
+                showToast('↩️ Edição resetada.');
+            });
+        }
+
+        if (selectCGStyle) {
+            selectCGStyle.addEventListener('change', (e) => {
+                state.cgStylePreset = e.target.value;
+                safeSetText(aiThoughtLog, `Especialidade visual alterada para: ${e.target.options[e.target.selectedIndex].text}.`);
+            });
+        }
+
+        if (selectImageFitMode) {
+            selectImageFitMode.addEventListener('change', (e) => {
+                state.imageFitMode = e.target.value;
+                updateApp();
+                safeSetText(aiThoughtLog, state.imageFitMode === 'contain'
+                    ? 'Encaixe alterado: imagem inteira visível no gabarito, sem cortes.'
+                    : 'Encaixe alterado: gabarito preenchido sem deformar a imagem.');
+            });
+        }
+
+        document.querySelectorAll('.agent-edit-command').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const command = btn.dataset.command || btn.textContent;
+                aiPromptText.value = command;
+                applyImageEditCommand(command);
+            });
         });
 
         colorExterior.addEventListener('input', (e) => {
@@ -1491,6 +1799,8 @@
                 state.customFullBannerImage = img;
                 state.customLogoImage = null;
                 state.customLogoName = null;
+                state.imageFitMode = selectImageFitMode?.value || 'cover';
+                resetImageAdjustments();
 
                 uploadBannerFeedback.classList.remove('hidden');
                 uploadFeedback.classList.add('hidden');
@@ -1505,6 +1815,9 @@
         btnResetFullBanner.addEventListener('click', () => {
             state.customFullBannerImage = null;
             state.customFullBannerName = null;
+            resetImageAdjustments();
+            state.imageFitMode = 'cover';
+            if (selectImageFitMode) selectImageFitMode.value = 'cover';
             inputFullBanner.value = '';
             uploadBannerFeedback.classList.add('hidden');
             updateApp();
