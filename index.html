@@ -395,6 +395,45 @@
                                 </div>
                             </div>
 
+                            <div class="bg-black/35 border border-emerald-500/20 rounded-2xl p-4 flex flex-col gap-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                    <div>
+                                        <span class="text-xs font-mono tracking-wider font-bold text-emerald-400 flex items-center gap-2">
+                                            <i class="fa-solid fa-sparkles"></i> EDIÇÃO REAL COM IA (OPENAI)
+                                        </span>
+                                        <p class="text-[10px] text-gray-500 mt-1">Use uma imagem enviada como referência e peça uma transformação real com IA. Ideal para caricatura, anime, HQ, vetor e estilo Paul Rand.</p>
+                                    </div>
+                                    <button id="btnClearOpenAIKey"
+                                        class="text-[10px] text-gray-300 hover:text-white bg-black/40 border border-white/10 hover:border-red-500/40 px-3 py-2 rounded-xl transition-all self-start sm:self-auto">
+                                        <i class="fa-solid fa-key"></i> Limpar chave
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+                                    <div>
+                                        <label class="block text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-1">OpenAI API Key (salva só neste navegador)</label>
+                                        <input type="password" id="openaiApiKeyInput"
+                                            class="w-full bg-black/40 border border-emerald-500/30 text-white rounded-xl p-3 text-xs focus:outline-none focus:border-emerald-500"
+                                            placeholder="sk-...">
+                                    </div>
+                                    <button id="btnSaveOpenAIKey"
+                                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-floppy-disk"></i> Salvar chave
+                                    </button>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-black/30 rounded-xl border border-white/5 p-3">
+                                    <div class="text-[10px] text-gray-500 leading-relaxed">
+                                        <strong class="text-white">Modo real:</strong> envia a imagem de referência + seu comando para a IA gerar uma nova arte editada.
+                                        <span class="block mt-1">Para produção, o ideal é mover essa chamada para um backend/proxy seguro.</span>
+                                    </div>
+                                    <button id="btnRealEditAI"
+                                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Editar com IA Real
+                                    </button>
+                                </div>
+                            </div>
+
                             <div class="bg-black/35 border border-violet-500/20 rounded-2xl p-4 flex flex-col gap-4">
                                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                     <div>
@@ -758,7 +797,8 @@
             },
             cgStylePreset: 'rand',
             agentReferenceImage: null,
-            agentReferenceImageName: null
+            agentReferenceImageName: null,
+            agentReferenceFile: null
         };
 
         const bannerCanvas = document.getElementById('bannerCanvas');
@@ -788,6 +828,10 @@
         const inputAgentReference = document.getElementById('inputAgentReference');
         const uploadAgentReferenceFeedback = document.getElementById('uploadAgentReferenceFeedback');
         const btnClearAgentReference = document.getElementById('btnClearAgentReference');
+        const openaiApiKeyInput = document.getElementById('openaiApiKeyInput');
+        const btnSaveOpenAIKey = document.getElementById('btnSaveOpenAIKey');
+        const btnClearOpenAIKey = document.getElementById('btnClearOpenAIKey');
+        const btnRealEditAI = document.getElementById('btnRealEditAI');
         const selectCGStyle = document.getElementById('selectCGStyle');
         const selectImageFitMode = document.getElementById('selectImageFitMode');
         const sliderArtZoom = document.getElementById('sliderArtZoom');
@@ -1407,9 +1451,10 @@
             });
         }
 
-        function setAgentReferenceImage(img, fileName = 'imagem enviada') {
+        function setAgentReferenceImage(img, fileName = 'imagem enviada', originalFile = null) {
             state.agentReferenceImage = img;
             state.agentReferenceImageName = fileName;
+            state.agentReferenceFile = originalFile;
             state.customFullBannerImage = img;
             state.customFullBannerName = fileName;
             state.customLogoImage = null;
@@ -1435,6 +1480,7 @@
 
             state.agentReferenceImage = null;
             state.agentReferenceImageName = null;
+            state.agentReferenceFile = null;
 
             if (inputAgentReference) inputAgentReference.value = '';
             if (uploadAgentReferenceFeedback) uploadAgentReferenceFeedback.classList.add('hidden');
@@ -1445,6 +1491,179 @@
                 resetImageAdjustments();
                 resetImageTransform();
                 updateApp();
+            }
+        }
+
+        function getStoredOpenAIKey() {
+            try {
+                return localStorage.getItem('mugstudio_openai_key') || '';
+            } catch {
+                return '';
+            }
+        }
+
+        function saveOpenAIKey(key) {
+            try {
+                localStorage.setItem('mugstudio_openai_key', key);
+            } catch (err) {
+                console.error('Falha ao salvar chave OpenAI:', err);
+            }
+        }
+
+        function clearOpenAIKey() {
+            try {
+                localStorage.removeItem('mugstudio_openai_key');
+            } catch (err) {
+                console.error('Falha ao limpar chave OpenAI:', err);
+            }
+        }
+
+        function syncOpenAIKeyInput() {
+            if (openaiApiKeyInput) openaiApiKeyInput.value = getStoredOpenAIKey();
+        }
+
+        function imageToPngFile(img, filename = 'referencia.png') {
+            return new Promise((resolve, reject) => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth || img.width;
+                    canvas.height = img.naturalHeight || img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            reject(new Error('Não foi possível converter a imagem para PNG.'));
+                            return;
+                        }
+                        resolve(new File([blob], filename, { type: 'image/png' }));
+                    }, 'image/png');
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
+        async function getReferenceFileForRealEdit() {
+            if (state.agentReferenceFile instanceof File) {
+                return state.agentReferenceFile;
+            }
+
+            if (state.agentReferenceImage) {
+                return imageToPngFile(state.agentReferenceImage, 'referencia-agente.png');
+            }
+
+            if (state.customFullBannerImage) {
+                return imageToPngFile(state.customFullBannerImage, 'arte-atual.png');
+            }
+
+            throw new Error('Envie uma imagem de referência para usar a edição real com IA.');
+        }
+
+        function loadBase64Image(base64, mimeType = 'image/png') {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Não foi possível carregar a imagem retornada pela IA.'));
+                img.src = `data:${mimeType};base64,${base64}`;
+            });
+        }
+
+        async function executeRealAIImageEdit(prompt) {
+            const command = normalizeText(prompt, 1000);
+            const apiKey = (openaiApiKeyInput?.value || getStoredOpenAIKey()).trim();
+
+            if (!command) {
+                showToast('⚠️ Escreva o que deseja que a IA faça com a imagem.');
+                return;
+            }
+
+            if (!apiKey) {
+                showToast('⚠️ Informe sua OpenAI API Key para usar a edição real.');
+                return;
+            }
+
+            const referenceFile = await getReferenceFileForRealEdit();
+
+            canvasLoader.classList.remove('hidden');
+            loaderText.innerText = 'A IA ESTÁ EDITANDO SUA IMAGEM...';
+            aiStatusBadge.className = 'text-emerald-400 flex items-center gap-1';
+            aiStatusBadge.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Editando com IA real...';
+            aiThoughtLog.classList.add('typing');
+            safeSetText(aiThoughtLog, 'O Diretor de Arte CG está usando a imagem enviada como referência para gerar uma nova versão editada por IA.');
+
+            try {
+                const enhancedPrompt = [
+                    'Edit this image into a professional artwork for a mug wrap sublimation design.',
+                    'Keep the main identity and essential visual subject recognizable when applicable.',
+                    'Use a wide, print-friendly composition suitable for a horizontal mug wrap.',
+                    'Avoid distortion and keep clean composition.',
+                    `Requested transformation: ${command}`
+                ].join(' ');
+
+                const formData = new FormData();
+                formData.append('model', 'gpt-image-1');
+                formData.append('image', referenceFile, referenceFile.name || 'referencia.png');
+                formData.append('prompt', enhancedPrompt);
+                formData.append('size', '1536x1024');
+
+                const response = await fetch('https://api.openai.com/v1/images/edits', {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${apiKey}` },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    let errorMessage = `Erro HTTP ${response.status}`;
+                    try {
+                        const errorJson = await response.json();
+                        errorMessage = errorJson?.error?.message || errorMessage;
+                    } catch {}
+                    throw new Error(errorMessage);
+                }
+
+                const result = await response.json();
+                const first = result?.data?.[0];
+                const base64 = first?.b64_json;
+                const imageUrl = first?.url;
+                let img;
+
+                if (base64) {
+                    img = await loadBase64Image(base64);
+                } else if (imageUrl) {
+                    img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = () => reject(new Error('Não foi possível carregar a URL da imagem retornada.'));
+                        img.src = imageUrl;
+                    });
+                } else {
+                    throw new Error('A IA não retornou uma imagem editada.');
+                }
+
+                state.customFullBannerImage = img;
+                state.customFullBannerName = 'arte-editada-ia-real';
+                state.imageFitMode = 'contain';
+                resetImageAdjustments();
+                resetImageTransform();
+                if (selectImageFitMode) selectImageFitMode.value = state.imageFitMode;
+                updateApp();
+
+                aiThoughtLog.classList.remove('typing');
+                safeSetText(aiThoughtLog, `Diretor de Arte CG concluiu a edição real por IA: "${normalizeText(command, 140)}".`);
+                aiStatusBadge.className = 'text-emerald-400 flex items-center gap-1';
+                aiStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Edição real concluída';
+                showToast('✨ Edição real com IA concluída.');
+            } catch (err) {
+                console.error('Falha na edição real com IA:', err);
+                aiThoughtLog.classList.remove('typing');
+                safeSetText(aiThoughtLog, `Falha na edição real com IA: ${err.message}`);
+                aiStatusBadge.className = 'text-red-400 flex items-center gap-1';
+                aiStatusBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Falha na edição';
+                showToast(`❌ ${err.message}`);
+            } finally {
+                canvasLoader.classList.add('hidden');
+                loaderText.innerText = 'A CONSTRUIR A ARTE DE SUBLIMAÇÃO...';
             }
         }
 
@@ -1999,13 +2218,33 @@
             showToast('↩️ Filtros resetados.');
         });
 
+        btnSaveOpenAIKey?.addEventListener('click', () => {
+            const key = (openaiApiKeyInput?.value || '').trim();
+            if (!key) {
+                showToast('⚠️ Informe uma OpenAI API Key válida.');
+                return;
+            }
+            saveOpenAIKey(key);
+            showToast('🔐 Chave OpenAI salva neste navegador.');
+        });
+
+        btnClearOpenAIKey?.addEventListener('click', () => {
+            clearOpenAIKey();
+            if (openaiApiKeyInput) openaiApiKeyInput.value = '';
+            showToast('🗑️ Chave OpenAI removida.');
+        });
+
+        btnRealEditAI?.addEventListener('click', async () => {
+            await executeRealAIImageEdit(aiPromptText.value);
+        });
+
         inputAgentReference?.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
             try {
                 const img = await loadImageFile(file, 8);
-                setAgentReferenceImage(img, file.name);
+                setAgentReferenceImage(img, file.name, file);
                 showToast('🖼️ Imagem carregada para edição com o agente.');
             } catch (err) {
                 console.error('Falha ao carregar imagem do agente:', err);
@@ -2028,6 +2267,7 @@
         });
 
         syncArtworkFramingControls();
+        syncOpenAIKeyInput();
 
         document.querySelectorAll('.quick-prompt-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
