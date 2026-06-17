@@ -237,7 +237,7 @@
                                 <option value="mugClassic">Caneca Tradicional 325ml</option>
                                 <option value="mugSlim">Caneca Slim Premium</option>
                                 <option value="bottle">Garrafa / Squeeze</option>
-                                <option value="shirt">Camisa Estampada</option>
+                                
                             </select>
                         </div>
                         <div
@@ -425,7 +425,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
                                     <div>
                                         <label class="block text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-1">OpenAI API Key (salva só neste navegador)</label>
-                                        <input type="password" id="openaiApiKeyInput"
+                                        <input type="password" id="/*removed*/"
                                             class="w-full bg-black/40 border border-emerald-500/30 text-white rounded-xl p-3 text-xs focus:outline-none focus:border-emerald-500"
                                             placeholder="sk-...">
                                     </div>
@@ -440,336 +440,7 @@
                                         <strong class="text-white">Modo real:</strong> envia a imagem de referência + seu comando para a IA gerar uma nova arte editada.
                                         <span class="block mt-1">Para produção, o ideal é mover essa chamada para um backend/proxy seguro.</span>
                                     </div>
-                                    <button id="btnRealEditAI"
-                                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Editar com IA Real
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="bg-black/35 border border-violet-500/20 rounded-2xl p-4 flex flex-col gap-4">
-                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                    <div>
-                                        <span class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
-                                            <i class="fa-solid fa-crop-simple"></i> ENQUADRAMENTO PROFISSIONAL
-                                        </span>
-                                        <p class="text-[10px] text-gray-500 mt-1">Ajuste a arte no gabarito antes de enviar ao cliente.</p>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2">
-                                        <button id="btnCenterArtwork"
-                                            class="text-[10px] text-gray-300 hover:text-white bg-violet-600/20 border border-violet-500/30 hover:border-violet-400 px-3 py-2 rounded-xl transition-all">
-                                            <i class="fa-solid fa-crosshairs"></i> Centralizar
-                                        </button>
-                                        <button id="btnResetArtworkFrame"
-                                            class="text-[10px] text-gray-300 hover:text-white bg-black/40 border border-white/10 hover:border-red-500/40 px-3 py-2 rounded-xl transition-all">
-                                            <i class="fa-solid fa-rotate-left"></i> Resetar Frame
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="text-[10px] font-mono text-gray-500 uppercase flex justify-between mb-1">
-                                            <span>Zoom da arte</span><span id="artZoomValue" class="text-violet-300">100%</span>
-                                        </label>
-                                        <input type="range" id="sliderArtZoom" min="50" max="220" value="100"
-                                            class="w-full accent-violet-500 h-2 bg-gray-700 rounded-lg cursor-pointer">
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] font-mono text-gray-500 uppercase flex justify-between mb-1">
-                                            <span>Rotação</span><span id="artRotationValue" class="text-violet-300">0°</span>
-                                        </label>
-                                        <input type="range" id="sliderArtRotation" min="-15" max="15" value="0"
-                                            class="w-full accent-violet-500 h-2 bg-gray-700 rounded-lg cursor-pointer">
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] font-mono text-gray-500 uppercase flex justify-between mb-1">
-                                            <span>Mover horizontal</span><span id="artOffsetXValue" class="text-violet-300">0</span>
-                                        </label>
-                                        <input type="range" id="sliderArtOffsetX" min="-100" max="100" value="0"
-                                            class="w-full accent-violet-500 h-2 bg-gray-700 rounded-lg cursor-pointer">
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] font-mono text-gray-500 uppercase flex justify-between mb-1">
-                                            <span>Mover vertical</span><span id="artOffsetYValue" class="text-violet-300">0</span>
-                                        </label>
-                                        <input type="range" id="sliderArtOffsetY" min="-100" max="100" value="0"
-                                            class="w-full accent-violet-500 h-2 bg-gray-700 rounded-lg cursor-pointer">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col gap-2">
-                            <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Ideias Rápidas
-                                para o Diretor de Arte:</span>
-                            <div class="flex flex-wrap gap-2">
-                                <button
-                                    class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all">
-                                    🟨 Logo modernista para cafeteria artesanal
-                                </button>
-                                <button
-                                    class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all">
-                                    🔴 Cartaz publicitário geométrico para barbearia
-                                </button>
-                                <button
-                                    class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all">
-                                    🟦 Identidade visual minimalista para loja infantil
-                                </button>
-                                <button
-                                    class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all">
-                                    ⚫ Caneca premium com símbolo abstrato e tipografia forte
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="aiConsoleBox"
-                            class="bg-black/60 border border-violet-950/40 rounded-2xl p-4 font-mono text-xs flex flex-col gap-2 min-h-[140px] justify-between">
-                            <div class="flex justify-between items-center text-gray-500 border-b border-white/5 pb-1.5">
-                                <span><i class="fa-solid fa-brain"></i> DIRETOR DE ARTE CG:</span>
-                                <span id="aiStatusBadge" class="text-emerald-400 flex items-center gap-1"><span
-                                        class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Pronto para criar</span>
-                            </div>
-                            <div id="aiThoughtLog"
-                                class="text-violet-300/95 leading-relaxed overflow-y-auto max-h-[100px]">
-                                "Olá! O Diretor de Arte CG está ativo. Posso criar logos, cartazes, identidades visuais, ilustrações e artes para sublimação com composição profissional."
-                            </div>
-                            <div class="text-[10px] text-gray-600 border-t border-white/5 pt-1 flex justify-between">
-                                <span>Resolução Real: 205mm x 92mm</span>
-                                <span>Proporção de Corte: Automática</span>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div id="panelManual" class="hidden flex flex-col gap-5">
-
-                        <div
-                            class="bg-gradient-to-r from-violet-600/10 to-indigo-600/10 rounded-2xl p-4 border border-violet-500/30 flex flex-col gap-3">
-                            <span
-                                class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
-                                <i class="fa-solid fa-cloud-arrow-up text-sm"></i> ENVIAR ARTE COMPLETA (GABARITO
-                                205x92mm)
-                            </span>
-                            <input type="file" id="inputFullBanner" accept="image/*"
-                                class="w-full text-xs text-gotham-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-500 bg-transparent cursor-pointer">
-                            <div class="flex items-center justify-between gap-2 mt-1">
-                                <div id="uploadBannerFeedback" class="hidden text-[10px] text-green-400 font-mono"><i
-                                        class="fa-solid fa-circle-check"></i> Arte de sublimação aplicada!</div>
-                                <button id="btnResetFullBanner"
-                                    class="text-[10px] text-red-400 hover:text-red-300 font-mono flex items-center gap-1 transition-all ml-auto">
-                                    <i class="fa-solid fa-trash-can"></i> Limpar / Voltar ao Editor
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 bg-black/30 p-4 rounded-2xl border border-white/5">
-                            <div>
-                                <label class="block text-xs font-medium mb-1.5 text-gotham-light">PORCELANA
-                                    (FORA):</label>
-                                <div
-                                    class="flex items-center gap-2 bg-gotham-card rounded-xl p-2 border border-white/10">
-                                    <input type="color" id="colorExterior" value="#121214"
-                                        class="w-8 h-8 rounded cursor-pointer bg-transparent border-0">
-                                    <span id="hexExterior" class="text-xs font-mono text-white">#121214</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium mb-1.5 text-gotham-light">INTERIOR /
-                                    ALÇA:</label>
-                                <div
-                                    class="flex items-center gap-2 bg-gotham-card rounded-xl p-2 border border-white/10">
-                                    <input type="color" id="colorInterior" value="#FFD700"
-                                        class="w-8 h-8 rounded cursor-pointer bg-transparent border-0">
-                                    <span id="hexInterior" class="text-xs font-mono text-white">#FFD700</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex flex-col gap-4">
-                            <span class="text-xs font-mono tracking-wider font-bold text-violet-400">LADO A: LOGOTIPO OU
-                                IMAGEM</span>
-
-                            <div class="p-3 bg-black/40 rounded-xl border border-white/10">
-                                <label class="block text-xs font-medium mb-1.5 text-violet-300"><i
-                                        class="fa-solid fa-upload"></i> CARREGAR LOGO/PNG:</label>
-                                <input type="file" id="inputCustomLogo" accept="image/*"
-                                    class="w-full text-xs text-gotham-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-500 bg-transparent cursor-pointer">
-                                <div id="uploadFeedback" class="hidden mt-2 text-[10px] text-green-400 font-mono"><i
-                                        class="fa-solid fa-circle-check"></i> Logo carregado!</div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-medium mb-1.5 text-gotham-light">COR DO
-                                        LOGO:</label>
-                                    <input type="color" id="colorLogo" value="#000000"
-                                        class="w-full h-10 rounded-xl cursor-pointer bg-gotham-card border border-white/10 p-1">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1.5 text-gotham-light">ESCALA DO
-                                        LOGO:</label>
-                                    <input type="range" id="sliderLogoScale" min="60" max="140" value="100"
-                                        class="w-full accent-violet-500 h-2 mt-4 bg-gray-700 rounded-lg cursor-pointer">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex flex-col gap-4">
-                            <span class="text-xs font-mono tracking-wider font-bold text-violet-400">LADO B: FRASE
-                                PERSONALIZADA</span>
-
-                            <div>
-                                <label class="block text-xs font-medium mb-1.5 text-gotham-light">TEXTO DO VERSO (LINHA
-                                    1):</label>
-                                <input type="text" id="inputTextL1" value="I AM THE"
-                                    class="w-full bg-gotham-card border border-white/10 text-white rounded-xl p-3 text-sm focus:outline-none focus:border-violet-500 font-mono uppercase">
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-medium mb-1.5 text-gotham-light">TEXTO DO VERSO (LINHA
-                                    2 - DESTAQUE):</label>
-                                <input type="text" id="inputTextL2" value="NIGHT."
-                                    class="w-full bg-gotham-card border border-white/10 text-white rounded-xl p-3 text-sm focus:outline-none focus:border-violet-500 font-mono uppercase">
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-medium mb-2 text-gotham-light">FONTE:</label>
-                                    <select id="selectFont"
-                                        class="w-full bg-gotham-card border border-white/10 text-white rounded-xl p-2.5 text-sm focus:outline-none focus:border-violet-500">
-                                        <option value="Bebas Neue">Bebas Neue</option>
-                                        <option value="Montserrat">Montserrat</option>
-                                        <option value="Cinzel">Cinzel</option>
-                                        <option value="Permanent Marker">Marker</option>
-                                        <option value="Fira Code">Fira Code</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium mb-1.5 text-gotham-light">COR DO
-                                        TEXTO:</label>
-                                    <input type="color" id="colorText" value="#FFD700"
-                                        class="w-full h-10 rounded-xl cursor-pointer bg-gotham-card border border-white/10 p-1">
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div id="clientPanel"
-                    class="hidden bg-[#0F1016] rounded-3xl p-6 border-2 border-emerald-500/30 shadow-2xl flex flex-col gap-6 animate-pulse">
-
-                    <div class="flex flex-col gap-2 text-center border-b border-white/10 pb-4">
-                        <span
-                            class="text-[10px] font-mono tracking-widest text-emerald-400 font-extrabold uppercase">Apresentação
-                            de Produto Exclusiva</span>
-                        <h2 class="text-2xl font-black text-white tracking-wide">AVALIAÇÃO DO PROJETO 3D</h2>
-                        <p class="text-xs text-gotham-light/70">Gira a caneca em 3D e altera o acabamento para conferir
-                            a estampa oficial de 205x92mm.</p>
-                    </div>
-
-                    <div class="bg-emerald-950/20 border border-emerald-500/30 rounded-2xl p-4 flex gap-3">
-                        <div class="text-emerald-400 text-2xl pt-1">
-                            <i class="fa-solid fa-clipboard-check"></i>
-                        </div>
-                        <div class="text-xs leading-relaxed text-emerald-300">
-                            <strong class="text-white block mb-1">Como funciona a aprovação?</strong>
-                            Se estiveres satisfeito com o design, clica em **Aprovar Projeto** para confirmar. Se
-                            quiseres alterar cores, textos ou imagens, usa o botão **Solicitar Ajustes**.
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-4">
-                        <button id="btnApproveDesign"
-                            class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white py-4 px-6 rounded-2xl shadow-xl shadow-emerald-950/40 transition-all font-black text-lg flex items-center justify-center gap-2.5 border border-emerald-400/30">
-                            <i class="fa-solid fa-circle-check text-xl"></i> APROVAR PROJETO COMPLETO
-                        </button>
-
-                        <button id="btnRequestChanges"
-                            class="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-300 py-4 px-6 rounded-2xl border border-white/10 transition-all font-bold flex items-center justify-center gap-2 text-sm">
-                            <i class="fa-solid fa-pen-to-square"></i> Solicitar Ajustes / Alterações
-                        </button>
-                    </div>
-
-                    <div id="feedbackTextContainer"
-                        class="hidden flex flex-col gap-3 p-4 bg-black/40 rounded-2xl border border-white/5">
-                        <label class="text-xs font-mono text-gray-400 uppercase tracking-wider block">O que gostarias de
-                            ajustar na arte?</label>
-                        <textarea id="feedbackText" rows="3"
-                            class="w-full bg-[#12131C] border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-violet-500 transition-all font-medium"
-                            placeholder="Ex: Mudar a cor de fundo para azul-marinho..."></textarea>
-                        <button id="btnCopyFeedback"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 ml-auto transition-all">
-                            <i class="fa-brands fa-whatsapp text-lg"></i> Enviar Alterações no WhatsApp
-                        </button>
-                    </div>
-
-                    <button id="btnExitViewer"
-                        class="text-center text-[10px] text-gray-600 hover:text-white transition-all underline font-mono mt-2">
-                        <i class="fa-solid fa-lock-open mr-1"></i> Voltar ao Painel do Designer
-                    </button>
-
-                </div>
-
-            </section>
-
-        </main>
-
-        <section id="bannerSection" class="max-w-7xl mx-auto p-4 lg:p-6 w-full">
-            <div class="bg-black/70 rounded-3xl p-6 border border-white/5 flex flex-col gap-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-map text-violet-400"></i> BANNER DE IMPRESSÃO (GABARITO 205x92mm)
-                        </h3>
-                        <p class="text-xs text-gotham-light/70">Este é o ficheiro de impressão. O vão branco traseiro
-                            encaixa exatamente na alça da caneca física.</p>
-                    </div>
-                    <span
-                        class="text-xs bg-violet-500/15 border border-violet-500/30 text-violet-400 px-3 py-1 rounded font-mono font-bold">
-                        Gabarito Oficial: 1025px × 460px (205:92)
-                    </span>
-                </div>
-
-                <div
-                    class="w-full overflow-x-auto flex justify-center bg-zinc-950 p-4 rounded-2xl border border-white/10">
-                    <canvas id="bannerCanvas" width="1025" height="460"
-                        class="max-w-full rounded border border-dashed border-gray-600 bg-black"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <footer
-            class="border-t border-gotham-card bg-black/90 py-6 px-4 text-center text-xs text-gotham-light/40 font-mono mt-12">
-            <p>© 2026 MugStudio IA. Estúdio de Sublimação de Canecas com Gabarito Técnico Homologado.</p>
-        </footer>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
-        
-       const firebaseConfig = {
-            apiKey: "AIzaSyCJyVEblu0ELGgvhos4B5XdICF_I5nmrVE",
-            authDomain: "mugstudio-704f2.firebaseapp.com",
-            projectId: "mugstudio-704f2",
-
-            storageBucket: "mugstudio-704f2.firebasestorage.app",
-
-            messagingSenderId: "281876090348",
-
-            appId: "1:281876090348:web:0a07a55eed314e5c2304c9",
-
-            measurementId: "G-P1FSLP846L"
-
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+                                    <button id="        const db = getFirestore(app);
         const auth = getAuth(app);
         console.log("🔥 Firebase conectado com sucesso!");
 
@@ -842,11 +513,10 @@
         const inputAgentReference = document.getElementById('inputAgentReference');
         const uploadAgentReferenceFeedback = document.getElementById('uploadAgentReferenceFeedback');
         const btnClearAgentReference = document.getElementById('btnClearAgentReference');
-        const openaiApiKeyInput = document.getElementById('openaiApiKeyInput');
+        const /*removed*/ = document.getElementById('/*removed*/');
         const btnSaveOpenAIKey = document.getElementById('btnSaveOpenAIKey');
         const btnClearOpenAIKey = document.getElementById('btnClearOpenAIKey');
-        const btnRealEditAI = document.getElementById('btnRealEditAI');
-        const selectCGStyle = document.getElementById('selectCGStyle');
+        const         const selectCGStyle = document.getElementById('selectCGStyle');
         const selectImageFitMode = document.getElementById('selectImageFitMode');
         const sliderArtZoom = document.getElementById('sliderArtZoom');
         const sliderArtOffsetX = document.getElementById('sliderArtOffsetX');
@@ -1202,11 +872,7 @@
             mugHandleMesh = null;
             bottleNeckMesh = null;
             bottleCapMesh = null;
-            shirtBodyMesh = null;
-            shirtPrintMesh = null;
-            shirtSleeveLeftMesh = null;
-            shirtSleeveRightMesh = null;
-            shirtCollarMesh = null;
+            /*shirt removed*/
         }
 
         function getProductCameraPreset() {
@@ -1215,7 +881,7 @@
                     return { position: [0, 4.5, 18], target: [0, 0.6, 0] };
                 case 'bottle':
                     return { position: [0, 5.2, 19], target: [0, 1.5, 0] };
-                case 'shirt':
+                case 'shirt_DISABLED':
                     return { position: [0, 2.6, 16], target: [0, 0.4, 0] };
                 case 'mugClassic':
                 default:
@@ -1263,7 +929,7 @@
             canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
 
             switch (state.productType) {
-                case 'shirt':
+                case 'shirt_DISABLED':
                     // Usa apenas a área central da arte para não herdar o enquadramento da caneca.
                     canvasTexture.wrapS = THREE.ClampToEdgeWrapping;
                     canvasTexture.repeat.set(0.56, 1);
@@ -1437,77 +1103,7 @@
             return baseY - 0.12;
         }
 
-        function buildShirtModel() {
-            const fabricColor = new THREE.Color(state.exteriorColor || '#F5F5F5');
-            const clothMat = new THREE.MeshPhysicalMaterial({
-                color: fabricColor,
-                roughness: 0.96,
-                clearcoat: 0.0,
-                side: THREE.DoubleSide
-            });
-
-            const shirtShape = new THREE.Shape();
-            shirtShape.moveTo(-4.6, -6.2);
-            shirtShape.lineTo(-4.6, 2.4);
-            shirtShape.lineTo(-6.8, 4.7);
-            shirtShape.lineTo(-8.3, 1.7);
-            shirtShape.lineTo(-5.8, 0.1);
-            shirtShape.lineTo(-4.9, 1.0);
-            shirtShape.lineTo(-4.9, 6.2);
-            shirtShape.lineTo(4.9, 6.2);
-            shirtShape.lineTo(4.9, 1.0);
-            shirtShape.lineTo(5.8, 0.1);
-            shirtShape.lineTo(8.3, 1.7);
-            shirtShape.lineTo(6.8, 4.7);
-            shirtShape.lineTo(4.6, 2.4);
-            shirtShape.lineTo(4.6, -6.2);
-            shirtShape.lineTo(-4.6, -6.2);
-
-            const neckHole = new THREE.Path();
-            neckHole.absellipse(0, 4.85, 1.7, 1.08, 0, Math.PI, true);
-            shirtShape.holes.push(neckHole);
-
-            const bodyGeo = new THREE.ExtrudeGeometry(shirtShape, {
-                depth: 1.15,
-                bevelEnabled: true,
-                bevelSegments: 2,
-                bevelSize: 0.12,
-                bevelThickness: 0.08,
-                curveSegments: 24
-            });
-            bodyGeo.center();
-            shirtBodyMesh = new THREE.Mesh(bodyGeo, clothMat.clone());
-            shirtBodyMesh.castShadow = true;
-            shirtBodyMesh.receiveShadow = true;
-            mugGroup.add(shirtBodyMesh);
-
-            shirtSleeveLeftMesh = null;
-            shirtSleeveRightMesh = null;
-
-            shirtCollarMesh = new THREE.Mesh(new THREE.TorusGeometry(1.82, 0.24, 18, 54, Math.PI), new THREE.MeshPhysicalMaterial({
-                color: new THREE.Color(state.interiorColor || '#FFFFFF'),
-                roughness: 0.92,
-                clearcoat: 0.0
-            }));
-            shirtCollarMesh.rotation.x = Math.PI / 2;
-            shirtCollarMesh.position.set(0, 5.15, 0.68);
-            mugGroup.add(shirtCollarMesh);
-
-            const printMat = new THREE.MeshPhysicalMaterial({
-                map: canvasTexture,
-                transparent: true,
-                roughness: 0.9,
-                clearcoat: 0.0,
-                side: THREE.DoubleSide
-            });
-            shirtPrintMesh = new THREE.Mesh(new THREE.PlaneGeometry(6.25, 7.15), printMat);
-            shirtPrintMesh.position.set(0, 0.6, 0.84);
-            mugGroup.add(shirtPrintMesh);
-
-            mugOuterMesh = shirtPrintMesh;
-            return -6.35;
-        }
-
+        
         function createProductModel() {
             if (!scene || !canvasTexture) return;
             clearCurrentProductModel();
@@ -1525,10 +1121,7 @@
                 case 'bottle':
                     groundY = buildBottleModel();
                     break;
-                case 'shirt':
-                    groundY = buildShirtModel();
-                    break;
-                case 'mugClassic':
+                                case 'mugClassic':
                 default:
                     groundY = buildMugModel({ radius: 3.5, height: 8.6, thickness: 0.24, handleRadius: 2.0, handleTubeRadius: 0.38, handleOffsetX: -2.7 });
                     break;
@@ -1624,9 +1217,7 @@
                 mugOuterMesh.material.clearcoatRoughness = isMatte ? 0.0 : 0.08;
             }
 
-            if (state.productType === 'shirt') {
-                [shirtBodyMesh, shirtSleeveLeftMesh, shirtSleeveRightMesh].forEach((mesh) => {
-                    if (!mesh) return;
+            
                     mesh.material.color = exteriorColor;
                     mesh.material.roughness = 0.96;
                     mesh.material.clearcoat = 0.0;
@@ -1833,7 +1424,7 @@
         }
 
         function syncOpenAIKeyInput() {
-            if (openaiApiKeyInput) openaiApiKeyInput.value = getStoredOpenAIKey();
+            if (/*removed*/) /*removed*/.value = getStoredOpenAIKey();
         }
 
         function imageToPngFile(img, filename = 'referencia.png') {
@@ -1882,16 +1473,7 @@
             });
         }
 
-        async function executeRealAIImageEdit(prompt) {
-            const command = normalizeText(prompt, 1000);
-            const apiKey = (openaiApiKeyInput?.value || getStoredOpenAIKey()).trim();
-
-            if (!command) {
-                showToast('⚠️ Escreva o que deseja que a IA faça com a imagem.');
-                return;
-            }
-
-            if (!apiKey) {
+                    if (!apiKey) {
                 showToast('⚠️ Informe sua OpenAI API Key para usar a edição real.');
                 return;
             }
@@ -2537,7 +2119,7 @@
         });
 
         btnSaveOpenAIKey?.addEventListener('click', () => {
-            const key = (openaiApiKeyInput?.value || '').trim();
+            const key = (/*removed*/?.value || '').trim();
             if (!key) {
                 showToast('⚠️ Informe uma OpenAI API Key válida.');
                 return;
@@ -2548,13 +2130,11 @@
 
         btnClearOpenAIKey?.addEventListener('click', () => {
             clearOpenAIKey();
-            if (openaiApiKeyInput) openaiApiKeyInput.value = '';
+            if (/*removed*/) /*removed*/.value = '';
             showToast('🗑️ Chave OpenAI removida.');
         });
 
-        btnRealEditAI?.addEventListener('click', async () => {
-            await executeRealAIImageEdit(aiPromptText.value);
-        });
+                });
 
         inputAgentReference?.addEventListener('change', async (e) => {
             const file = e.target.files[0];
