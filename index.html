@@ -366,6 +366,39 @@
                                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                     <div>
                                         <span class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
+                                            <i class="fa-solid fa-image"></i> UPLOAD PARA O DIRETOR DE ARTE
+                                        </span>
+                                        <p class="text-[10px] text-gray-500 mt-1">Envie uma foto e peça uma edição como caricatura, anime, HQ, vetor ou estilo Paul Rand.</p>
+                                    </div>
+                                    <button id="btnClearAgentReference"
+                                        class="text-[10px] text-gray-300 hover:text-white bg-black/40 border border-white/10 hover:border-red-500/40 px-3 py-2 rounded-xl transition-all self-start sm:self-auto">
+                                        <i class="fa-solid fa-trash-can"></i> Limpar imagem
+                                    </button>
+                                </div>
+
+                                <input type="file" id="inputAgentReference" accept="image/png,image/jpeg,image/webp"
+                                    class="w-full text-xs text-gotham-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 bg-transparent cursor-pointer">
+
+                                <div class="flex items-center justify-between gap-2">
+                                    <div id="uploadAgentReferenceFeedback" class="hidden text-[10px] text-green-400 font-mono">
+                                        <i class="fa-solid fa-circle-check"></i> Imagem carregada para edição com o agente!
+                                    </div>
+                                    <span class="text-[10px] text-gray-500 ml-auto">Sugestões: “faça uma caricatura”, “estilo HQ”, “visual vetorial”, “Paul Rand”.</span>
+                                </div>
+
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="transforme a foto em caricatura divertida com traços expressivos e visual ilustrado">Caricatura</button>
+                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="transforme a foto em estilo anime com linhas limpas e cores vibrantes">Anime</button>
+                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="transforme a foto em estilo HQ com contraste forte e visual de quadrinhos">HQ</button>
+                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="converta a imagem para uma linguagem vetorial limpa com aparência de identidade visual">Vetor</button>
+                                    <button class="agent-edit-command text-[10px] text-gray-300 hover:text-violet-300 bg-black/40 border border-white/10 hover:border-violet-500/40 px-3 py-2 rounded-xl transition-all" data-command="aplique estilo Paul Rand com linguagem modernista, formas geométricas e espaço negativo">Paul Rand</button>
+                                </div>
+                            </div>
+
+                            <div class="bg-black/35 border border-violet-500/20 rounded-2xl p-4 flex flex-col gap-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                    <div>
+                                        <span class="text-xs font-mono tracking-wider font-bold text-violet-400 flex items-center gap-2">
                                             <i class="fa-solid fa-crop-simple"></i> ENQUADRAMENTO PROFISSIONAL
                                         </span>
                                         <p class="text-[10px] text-gray-500 mt-1">Ajuste a arte no gabarito antes de enviar ao cliente.</p>
@@ -723,7 +756,9 @@
                 grayscale: 0,
                 sepia: 0
             },
-            cgStylePreset: 'rand'
+            cgStylePreset: 'rand',
+            agentReferenceImage: null,
+            agentReferenceImageName: null
         };
 
         const bannerCanvas = document.getElementById('bannerCanvas');
@@ -750,6 +785,9 @@
         const btnGenerateAI = document.getElementById('btnGenerateAI');
         const btnEditAI = document.getElementById('btnEditAI');
         const btnResetImageEdits = document.getElementById('btnResetImageEdits');
+        const inputAgentReference = document.getElementById('inputAgentReference');
+        const uploadAgentReferenceFeedback = document.getElementById('uploadAgentReferenceFeedback');
+        const btnClearAgentReference = document.getElementById('btnClearAgentReference');
         const selectCGStyle = document.getElementById('selectCGStyle');
         const selectImageFitMode = document.getElementById('selectImageFitMode');
         const sliderArtZoom = document.getElementById('sliderArtZoom');
@@ -1369,6 +1407,47 @@
             });
         }
 
+        function setAgentReferenceImage(img, fileName = 'imagem enviada') {
+            state.agentReferenceImage = img;
+            state.agentReferenceImageName = fileName;
+            state.customFullBannerImage = img;
+            state.customFullBannerName = fileName;
+            state.customLogoImage = null;
+            state.customLogoName = null;
+            state.imageFitMode = 'contain';
+
+            resetImageAdjustments();
+            resetImageTransform();
+
+            if (selectImageFitMode) selectImageFitMode.value = state.imageFitMode;
+            if (uploadAgentReferenceFeedback) uploadAgentReferenceFeedback.classList.remove('hidden');
+            uploadBannerFeedback?.classList.add('hidden');
+            uploadFeedback?.classList.add('hidden');
+
+            safeSetText(aiThoughtLog, `Imagem "${normalizeText(fileName, 60)}" carregada. Agora peça ao Diretor de Arte CG uma edição como caricatura, HQ, anime, vetor ou Paul Rand.`);
+            aiStatusBadge.className = 'text-emerald-400 flex items-center gap-1';
+            aiStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Imagem pronta para editar';
+            updateApp();
+        }
+
+        function clearAgentReferenceImage() {
+            const currentIsAgentImage = state.customFullBannerImage && state.customFullBannerImage === state.agentReferenceImage;
+
+            state.agentReferenceImage = null;
+            state.agentReferenceImageName = null;
+
+            if (inputAgentReference) inputAgentReference.value = '';
+            if (uploadAgentReferenceFeedback) uploadAgentReferenceFeedback.classList.add('hidden');
+
+            if (currentIsAgentImage) {
+                state.customFullBannerImage = null;
+                state.customFullBannerName = null;
+                resetImageAdjustments();
+                resetImageTransform();
+                updateApp();
+            }
+        }
+
         function estimateObjectSizeBytes(value) {
             const json = JSON.stringify(value);
 
@@ -1495,6 +1574,49 @@
                 actions.push('movida para cima');
             }
 
+            if (/(caricatura|caricature|cartoon)/.test(text)) {
+                state.cgStylePreset = 'comic';
+                if (selectCGStyle) selectCGStyle.value = 'comic';
+                adj.contrast = clampNumber((adj.contrast ?? 100) + 24, 60, 190);
+                adj.saturation = clampNumber((adj.saturation ?? 100) + 18, 40, 220);
+                adj.hue = clampNumber((adj.hue ?? 0) + 4, -180, 180);
+                actions.push('estilo caricatura aplicado');
+            }
+
+            if (/(anime|mangá|manga)/.test(text)) {
+                state.cgStylePreset = 'anime';
+                if (selectCGStyle) selectCGStyle.value = 'anime';
+                adj.contrast = clampNumber((adj.contrast ?? 100) + 18, 60, 180);
+                adj.saturation = clampNumber((adj.saturation ?? 100) + 16, 40, 220);
+                actions.push('estilo anime aplicado');
+            }
+
+            if (/(hq|quadrinhos|comic|graphic novel)/.test(text)) {
+                state.cgStylePreset = 'comic';
+                if (selectCGStyle) selectCGStyle.value = 'comic';
+                adj.contrast = clampNumber((adj.contrast ?? 100) + 22, 60, 190);
+                adj.saturation = clampNumber((adj.saturation ?? 100) + 12, 40, 200);
+                actions.push('estilo HQ aplicado');
+            }
+
+            if (/(vetor|vector|flat|logo limpo)/.test(text)) {
+                state.cgStylePreset = 'vector';
+                if (selectCGStyle) selectCGStyle.value = 'vector';
+                adj.contrast = clampNumber((adj.contrast ?? 100) + 12, 60, 175);
+                adj.saturation = clampNumber((adj.saturation ?? 100) - 8, 40, 200);
+                actions.push('visual vetorial simulado');
+            }
+
+            if (/(paul rand|modernista|modernismo|branding|identidade visual)/.test(text)) {
+                state.cgStylePreset = /(branding|identidade visual)/.test(text) ? 'branding' : 'rand';
+                if (selectCGStyle) selectCGStyle.value = state.cgStylePreset;
+                state.imageFitMode = 'contain';
+                if (selectImageFitMode) selectImageFitMode.value = 'contain';
+                adj.contrast = clampNumber((adj.contrast ?? 100) + 10, 60, 170);
+                adj.saturation = clampNumber((adj.saturation ?? 100) - 6, 40, 180);
+                actions.push('linguagem modernista de marca aplicada');
+            }
+
             if (/(descer|baixo|para baixo)/.test(text)) {
                 state.imageTransform = { ...(state.imageTransform || {}), offsetY: clampNumber((state.imageTransform?.offsetY ?? 0) + 18, -100, 100) };
                 syncArtworkFramingControls();
@@ -1562,7 +1684,7 @@
             showToast('🎨 Arte editada pelo Diretor de Arte CG.');
         }
 
-        // --- DIRETOR DE ARTE CG ---
+        // --- SISTEMA NEURAL FLUX 4K FOTOREALISTA ---
         async function executeAIDesignAgent(prompt) {
             const query = normalizeText(prompt, 300).toLowerCase();
 
@@ -1629,9 +1751,9 @@
 
                     canvasLoader.classList.add('hidden');
                     aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
-                    aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte criada com direção de arte!`;
+                    aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
                     aiThoughtLog.classList.remove('typing');
-                    safeSetText(aiThoughtLog, `Diretor de Arte CG criou uma arte print-ready para caneca: "${normalizeText(prompt, 120)}". Proporção 205x92mm preservada, composição panorâmica e sem achatamento.`);
+                    safeSetText(aiThoughtLog, `Super Agente CG criou uma arte print-ready para caneca: "${normalizeText(prompt, 120)}". Proporção 205x92mm preservada, composição panorâmica e sem achatamento.`);
 
                     updateApp();
                 };
@@ -1877,6 +1999,26 @@
             showToast('↩️ Filtros resetados.');
         });
 
+        inputAgentReference?.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const img = await loadImageFile(file, 8);
+                setAgentReferenceImage(img, file.name);
+                showToast('🖼️ Imagem carregada para edição com o agente.');
+            } catch (err) {
+                console.error('Falha ao carregar imagem do agente:', err);
+                if (inputAgentReference) inputAgentReference.value = '';
+                showToast(err.message || '⚠️ Não foi possível carregar a imagem para o agente.');
+            }
+        });
+
+        btnClearAgentReference?.addEventListener('click', () => {
+            clearAgentReferenceImage();
+            showToast('🗑️ Imagem do agente removida.');
+        });
+
         document.querySelectorAll('.agent-edit-command').forEach(btn => {
             btn.addEventListener('click', () => {
                 const command = btn.dataset.command || btn.textContent;
@@ -2101,6 +2243,8 @@
             state.customLogoName = null;
             state.customFullBannerImage = null;
             state.customFullBannerName = null;
+            state.agentReferenceImage = null;
+            state.agentReferenceImageName = null;
             state.textLine1 = '';
             state.textLine2 = '';
             state.aiVectorShape = 'none';
