@@ -428,7 +428,7 @@
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Ideias Comerciais Rápidas - Agente V3:</span>
+                            <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Ideias Comerciais Rápidas - Agente V4:</span>
                             <div class="flex flex-wrap gap-2">
                                 <button
                                     class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all"
@@ -461,7 +461,7 @@
                                     🐾 Pet personalizado
                                 </button>
                             </div>
-                            <p class="text-[10px] text-gray-600 leading-relaxed">Dica: para nomes e frases, escreva no campo acima exatamente o texto que deseja. Agora o Agente V3 tenta gerar a ilustração sem letras e o MugStudio escreve o texto correto por cima no canvas.</p>
+                            <p class="text-[10px] text-gray-600 leading-relaxed">Dica: para nomes e frases, escreva no campo acima exatamente o texto que deseja. Agora o Agente V4 tenta gerar a ilustração sem letras e o MugStudio escreve o texto correto por cima no canvas.</p>
                         </div>
 
                         <div id="aiConsoleBox"
@@ -473,7 +473,7 @@
                             </div>
                             <div id="aiThoughtLog"
                                 class="text-violet-300/95 leading-relaxed overflow-y-auto max-h-[100px]">
-                                "Olá! Agente Comercial V3 ativo. Crio artes planificadas para canecas com foco em datas comemorativas, presentes personalizados e sublimação 205x92mm."
+                                "Olá! Agente Comercial V4 ativo. Crio artes planificadas para canecas com foco em datas comemorativas, presentes personalizados e sublimação 205x92mm."
                             </div>
                             <div class="text-[10px] text-gray-600 border-t border-white/5 pt-1 flex justify-between">
                                 <span>Resolução Real: 205mm x 92mm</span>
@@ -1189,8 +1189,34 @@
             const font = state.fontFamily || 'Montserrat';
             const mainColor = state.textColor || '#18344A';
             const safeMaxWidth = maxWidth * 0.72;
+            const panelW = Math.min(maxWidth * 0.66, 600);
+            const panelH = line1 && line2 ? 178 : 118;
+            const panelX = centerX - panelW / 2;
+            const panelY = centerY - panelH / 2;
+            const radius = 24;
 
             ctx.save();
+
+            // V4: cobre qualquer texto falso gerado pela IA e cria uma área limpa para o texto real do editor.
+            ctx.shadowColor = 'rgba(0,0,0,0.12)';
+            ctx.shadowBlur = 18;
+            ctx.fillStyle = 'rgba(255, 248, 232, 0.88)';
+            ctx.strokeStyle = 'rgba(217,119,6,0.35)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(panelX + radius, panelY);
+            ctx.lineTo(panelX + panelW - radius, panelY);
+            ctx.quadraticCurveTo(panelX + panelW, panelY, panelX + panelW, panelY + radius);
+            ctx.lineTo(panelX + panelW, panelY + panelH - radius);
+            ctx.quadraticCurveTo(panelX + panelW, panelY + panelH, panelX + panelW - radius, panelY + panelH);
+            ctx.lineTo(panelX + radius, panelY + panelH);
+            ctx.quadraticCurveTo(panelX, panelY + panelH, panelX, panelY + panelH - radius);
+            ctx.lineTo(panelX, panelY + radius);
+            ctx.quadraticCurveTo(panelX, panelY, panelX + radius, panelY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
@@ -1265,12 +1291,14 @@
             canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
             canvasTexture.wrapS = THREE.RepeatWrapping;
 
+            // V4: não espelhar a arte na caneca.
+            // Antes usávamos repeat X negativo, o que deixava textos e logos invertidos no mockup 3D.
             if (state.productType === 'bottle') {
-                canvasTexture.repeat.set(-1, 1);
-                canvasTexture.offset.set(0.5, 0);
+                canvasTexture.repeat.set(1, 1);
+                canvasTexture.offset.set(0.0, 0);
             } else {
-                canvasTexture.repeat.set(-1, 1);
-                canvasTexture.offset.set(0.75, 0);
+                canvasTexture.repeat.set(1, 1);
+                canvasTexture.offset.set(0.25, 0);
             }
 
             canvasTexture.needsUpdate = true;
@@ -1821,8 +1849,21 @@
             return COMMERCIAL_THEME_PRESETS.find(theme => theme.test.test(userPrompt || '')) || null;
         }
 
+        function sanitizePromptForBackground(userPrompt) {
+            return normalizeText(userPrompt, 900)
+                .replace(/texto\s+principal[^.?!]*(?:[.?!]|$)/gi, ' ')
+                .replace(/texto\s+secund[aá]rio[^.?!]*(?:[.?!]|$)/gi, ' ')
+                .replace(/texto\s+exato[^.?!]*(?:[.?!]|$)/gi, ' ')
+                .replace(/frase\s+principal[^.?!]*(?:[.?!]|$)/gi, ' ')
+                .replace(/escrever[^.?!]*(?:[.?!]|$)/gi, ' ')
+                .replace(/["“”'][^"“”']{2,100}["“”']/g, ' ')
+                .replace(/\s{2,}/g, ' ')
+                .trim();
+        }
+
         function buildCGPrompt(userPrompt) {
             const cleanPrompt = normalizeText(userPrompt, 900);
+            const promptForBackground = sanitizePromptForBackground(userPrompt) || 'commercial personalized gift mug wrap background with clean central empty title area';
             const style = CG_STYLE_PRESETS[state.cgStylePreset] || CG_STYLE_PRESETS.product;
             const theme = detectCommercialTheme(cleanPrompt);
             const quotedTexts = extractQuotedText(cleanPrompt);
@@ -1834,7 +1875,7 @@
                 'MASTERPIECE COMMERCIAL ARTWORK FOR PERSONALIZED MUG SUBLIMATION',
                 'Create a FLAT HORIZONTAL PRINTABLE WRAP BACKGROUND, not a product mockup, not a photo of a mug',
                 'Canvas aspect ratio exactly 205mm x 92mm, panoramic horizontal banner, full wrap design',
-                `Client request: ${cleanPrompt}`,
+                `Client request without text: ${promptForBackground}`,
                 theme ? `Commercial theme detected: ${theme.name}. ${theme.prompt}` : 'Commercial personalized gift mug wrap, attractive for Brazilian print shop customers',
                 `Visual style: ${style}`,
                 exactTextInstruction,
@@ -2025,7 +2066,7 @@
             state.imageAdjustments = adj;
             updateApp();
 
-            safeSetText(aiThoughtLog, `Agente Comercial V3 editou a arte: ${actions.join(', ')}.`);
+            safeSetText(aiThoughtLog, `Agente Comercial V4 editou a arte: ${actions.join(', ')}.`);
             aiStatusBadge.className = 'text-emerald-400 flex items-center gap-1';
             aiStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte editada';
             showToast('🎨 Arte editada pelo Diretor de Arte CG.');
@@ -2042,12 +2083,12 @@
 
             canvasLoader.classList.remove('hidden');
             aiStatusBadge.className = "text-violet-400 flex items-center gap-1";
-            aiStatusBadge.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Ativando Agente Comercial V3...`;
+            aiStatusBadge.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Ativando Agente Comercial V4...`;
             aiThoughtLog.classList.add('typing');
             const detectedTheme = detectCommercialTheme(query);
             safeSetText(aiThoughtLog, detectedTheme
-                ? `Agente V3 detectou tema comercial: ${detectedTheme.name}. Construindo uma arte planificada 205x92mm com composição de presente personalizado...`
-                : 'Agente V3 está criando uma arte planificada comercial para sublimação. Aguarde um instante...');
+                ? `Agente V4 detectou tema comercial: ${detectedTheme.name}. Construindo uma arte planificada 205x92mm com composição de presente personalizado...`
+                : 'Agente V4 está criando uma arte planificada comercial para sublimação. Aguarde um instante...');
 
             // Prompt técnico do agente especialista em arte comercial para canecas.
             const queryEnglish = buildCGPrompt(query);
@@ -2084,7 +2125,9 @@
                     state.customFullBannerImage = img;
                     state.customFullBannerName = null;
                     state.theme = 'custom';
-                    state.imageFitMode = selectImageFitMode?.value || 'cover';
+                    // V4: usar cover sempre em arte gerada por IA para evitar faixa com bordas brancas ou arte pequena no mockup.
+                    state.imageFitMode = 'cover';
+                    if (selectImageFitMode) selectImageFitMode.value = 'cover';
                     resetImageAdjustments();
                     resetImageTransform();
 
@@ -2105,7 +2148,7 @@
                     aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
                     aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
                     aiThoughtLog.classList.remove('typing');
-                    safeSetText(aiThoughtLog, `Agente Comercial V3 criou uma base ilustrada e aplicou texto editável para caneca: "${normalizeText(prompt, 120)}". Proporção 205x92mm preservada, composição panorâmica e sem achatamento.`);
+                    safeSetText(aiThoughtLog, `Agente Comercial V4 criou uma base ilustrada e aplicou texto editável para caneca: "${normalizeText(prompt, 120)}". Proporção 205x92mm preservada, composição panorâmica e sem achatamento.`);
 
                     updateApp();
                 };
