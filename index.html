@@ -140,7 +140,7 @@
                     Entrar
                 </button>
                 <button id="btnEmailSignup"
-                    class="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/20 py-3.5 rounded-xl text-sm font-bold transition-all">
+                    class="hidden flex-1 bg-transparent hover:bg-white/5 text-white border border-white/20 py-3.5 rounded-xl text-sm font-bold transition-all">
                     Criar Conta
                 </button>
             </div>
@@ -686,7 +686,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         
        const firebaseConfig = {
@@ -704,9 +704,28 @@
 
         };
 
+        // CONFIGURAÇÃO COMERCIAL DO MVP
+        // Antes de vender para uma loja, altere estes dados para o nome e WhatsApp do cliente.
+        // Para travar acesso por email, coloque restrictDesignerEmails: true e liste os emails permitidos.
+        const STORE_CONFIG = {
+            storeName: 'MugStudio IA',
+            whatsapp: '5511939545816',
+            restrictDesignerEmails: false,
+            allowedDesignerEmails: [
+                // 'seuemail@gmail.com'
+            ]
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
+        try {
+            await setPersistence(auth, browserSessionPersistence);
+        } catch (error) {
+            console.warn('Não foi possível aplicar persistência de sessão:', error);
+        }
+
         console.log("🔥 Firebase conectado com sucesso!");
 
         const state = {
@@ -1501,6 +1520,60 @@
             }, duration);
         }
 
+        function sanitizeWhatsappNumber(value) {
+            return String(value || '').replace(/\D/g, '');
+        }
+
+        function getStoreWhatsapp() {
+            return sanitizeWhatsappNumber(STORE_CONFIG.whatsapp);
+        }
+
+        function getStoreName() {
+            return normalizeText(STORE_CONFIG.storeName || 'MugStudio IA', 80);
+        }
+
+        function isDesignerEmailAllowed(user) {
+            if (!user?.email) return false;
+            if (!STORE_CONFIG.restrictDesignerEmails) return true;
+
+            const allowedEmails = (STORE_CONFIG.allowedDesignerEmails || [])
+                .map(email => String(email).trim().toLowerCase())
+                .filter(Boolean);
+
+            if (!allowedEmails.length) return false;
+            return allowedEmails.includes(user.email.toLowerCase());
+        }
+
+        function enterClientShellMode() {
+            designerPanel?.classList.add('hidden');
+            clientPanel?.classList.remove('hidden');
+            bannerSection?.classList.add('hidden');
+            designerStatusBadge?.classList.add('hidden');
+            clientStatusBadge?.classList.remove('hidden');
+            btnDownloadBanner?.classList.add('hidden');
+            btnClearAllArt?.classList.add('hidden');
+            btnShareClient?.classList.add('hidden');
+        }
+
+        function showClientLoadError(message) {
+            enterClientShellMode();
+            canvasLoader?.classList.add('hidden');
+
+            if (clientPanel) {
+                clientPanel.classList.remove('animate-pulse');
+                clientPanel.innerHTML = `
+                    <div class="flex flex-col gap-4 text-center py-8">
+                        <div class="mx-auto w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-2xl">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <h2 class="text-2xl font-black text-white">Projeto não disponível</h2>
+                        <p class="text-sm text-gray-400 leading-relaxed max-w-md mx-auto">${message}</p>
+                        <p class="text-xs text-gray-600 font-mono">Solicite um novo link para a loja responsável.</p>
+                    </div>
+                `;
+            }
+        }
+
         function safeSetText(element, text) {
             if (!element) return;
             element.textContent = text;
@@ -1850,6 +1923,15 @@
             showToast('🎨 Arte editada pelo Diretor de Arte CG.');
         }
 
+        function loadImageFromObjectUrl(objectUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Erro ao carregar a imagem gerada.'));
+                img.src = objectUrl;
+            });
+        }
+
         // --- SISTEMA NEURAL FLUX 4K FOTOREALISTA ---
         async function executeAIDesignAgent(prompt) {
             const query = normalizeText(prompt, 300).toLowerCase();
@@ -1892,44 +1974,38 @@
                 const blob = await response.blob();
                 objectUrl = URL.createObjectURL(blob);
 
-                const img = new Image();
+                const img = await loadImageFromObjectUrl(objectUrl);
 
-                img.onload = function () {
-                    if (objectUrl) URL.revokeObjectURL(objectUrl);
+                state.customFullBannerImage = img;
+                state.customFullBannerName = null;
+                state.theme = 'custom';
+                state.imageFitMode = selectImageFitMode?.value || 'cover';
+                resetImageAdjustments();
+                resetImageTransform();
 
-                    state.customFullBannerImage = img;
-                    state.customFullBannerName = null;
-                    state.theme = 'custom';
-                    state.imageFitMode = selectImageFitMode?.value || 'cover';
-                    resetImageAdjustments();
-                    resetImageTransform();
+                // Esconde textos para não atrapalhar a arte principal gerada pelo diretor de arte.
+                state.textLine1 = '';
+                state.textLine2 = '';
+                inputTextL1.value = '';
+                inputTextL2.value = '';
 
-                    // Esconde textos para não atrapalhar a arte principal gerada pelo diretor de arte.
-                    state.textLine1 = '';
-                    state.textLine2 = '';
-                    inputTextL1.value = '';
-                    inputTextL2.value = '';
+                state.exteriorColor = '#121214';
+                state.interiorColor = '#FFFFFF';
+                colorExterior.value = state.exteriorColor;
+                colorInterior.value = state.interiorColor;
 
-                    state.exteriorColor = '#121214';
-                    state.interiorColor = '#FFFFFF';
-                    colorExterior.value = state.exteriorColor;
-                    colorInterior.value = state.interiorColor;
+                canvasLoader.classList.add('hidden');
+                aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
+                aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte criada!`;
+                aiThoughtLog.classList.remove('typing');
+                safeSetText(aiThoughtLog, `Super Agente CG criou uma arte print-ready para caneca: "${normalizeText(prompt, 120)}". Proporção 205x92mm preservada, composição panorâmica e sem achatamento.`);
 
-                    canvasLoader.classList.add('hidden');
-                    aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
-                    aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
-                    aiThoughtLog.classList.remove('typing');
-                    safeSetText(aiThoughtLog, `Super Agente CG criou uma arte print-ready para caneca: "${normalizeText(prompt, 120)}". Proporção 205x92mm preservada, composição panorâmica e sem achatamento.`);
+                updateApp();
 
-                    updateApp();
-                };
-
-                img.onerror = function () {
-                    if (objectUrl) URL.revokeObjectURL(objectUrl);
-                    throw new Error('Erro ao carregar a imagem gerada.');
-                };
-
-                img.src = objectUrl;
+                if (objectUrl) {
+                    URL.revokeObjectURL(objectUrl);
+                    objectUrl = null;
+                }
             } catch (err) {
                 if (objectUrl) URL.revokeObjectURL(objectUrl);
                 console.error('Falha ao gerar arte IA:', err);
@@ -1966,6 +2042,10 @@
             showToast('⚡ A guardar no servidor...', 2000);
 
             try {
+                if (!auth.currentUser) {
+                    throw new Error('Sessão expirada. Faça login novamente para gerar o link do cliente.');
+                }
+
                 let fullArtData = null;
 
                 if (state.customFullBannerImage) {
@@ -1982,7 +2062,12 @@
 
                 const stateToSave = {
                     schemaVersion: 1,
+                    ownerUid: auth.currentUser.uid,
                     createdAt: Date.now(),
+                    store: {
+                        storeName: getStoreName(),
+                        whatsapp: getStoreWhatsapp()
+                    },
                     finish: state.finish,
                     exteriorColor: state.exteriorColor,
                     interiorColor: state.interiorColor,
@@ -2038,27 +2123,23 @@
                         showToast("✅ Projeto carregado com sucesso!");
                     } else {
                         showToast("⚠️ Link inválido ou projeto não encontrado.");
-                        canvasLoader.classList.add('hidden');
+                        showClientLoadError('O link informado não existe ou o projeto foi removido.');
                     }
                 } catch (err) {
                     console.error("Falha ao buscar projeto:", err);
                     showToast("⚠️ Falha ao conectar ao servidor.");
-                    canvasLoader.classList.add('hidden');
+                    showClientLoadError('Não foi possível carregar este projeto agora. Verifique o link ou tente novamente mais tarde.');
                 }
             }
         }
 
         function enterViewerMode(savedState) {
-            designerPanel.classList.add('hidden');
-            clientPanel.classList.remove('hidden');
-            bannerSection.classList.add('hidden');
-            designerStatusBadge.classList.add('hidden');
-            clientStatusBadge.classList.remove('hidden');
-            btnDownloadBanner.classList.add('hidden');
-            btnClearAllArt.classList.add('hidden');
-            btnShareClient.classList.add('hidden');
+            enterClientShellMode();
+            clientPanel?.classList.remove('animate-pulse');
 
             if (savedState) {
+                if (savedState.store?.storeName) STORE_CONFIG.storeName = savedState.store.storeName;
+                if (savedState.store?.whatsapp) STORE_CONFIG.whatsapp = sanitizeWhatsappNumber(savedState.store.whatsapp);
                 state.finish = savedState.finish || 'matte';
                 state.exteriorColor = savedState.exteriorColor || '#121214';
                 state.interiorColor = savedState.interiorColor || '#FFD700';
@@ -2374,16 +2455,24 @@
                 spread: 80,
                 origin: { y: 0.6 }
             });
+
+            const numeroWhatsAppLoja = getStoreWhatsapp();
+
+            if (!numeroWhatsAppLoja) {
+                showToast("⚠️ WhatsApp da loja não configurado.");
+                return;
+            }
+
             showToast("🎉 Abrindo WhatsApp...");
             btnApproveDesign.innerHTML = `<i class="fa-solid fa-circle-check text-xl"></i> DESIGN APROVADO!`;
             btnApproveDesign.className = "w-full bg-emerald-600 text-white py-4 px-6 rounded-2xl shadow-xl font-black text-lg flex items-center justify-center gap-2.5 border border-emerald-400 pointer-events-none";
 
-            const meuNumeroWhatsApp = "5511939545816";
-
             const linkDoProjeto = window.location.href;
-            const msgAprovacao = `✅ Olá! Acabei de APROVAR o projeto 3D da caneca.\nPode seguir com a produção!\n\nLink do projeto: ${linkDoProjeto}`;
+            const msgAprovacao = `✅ Olá, ${getStoreName()}! Acabei de APROVAR o projeto 3D da caneca.
+Pode seguir com a produção!
 
-            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(msgAprovacao)}`;
+Link do projeto: ${linkDoProjeto}`;
+            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsAppLoja}&text=${encodeURIComponent(msgAprovacao)}`;
 
             window.location.href = urlWhatsApp;
         });
@@ -2400,11 +2489,16 @@
             }
 
             const linkDoProjeto = window.location.href;
-            const fullFeedbackMsg = `⚠️ Olá! Avaliei o mockup 3D e gostaria de solicitar os seguintes ajustes:\n\n"${feedback}"\n\nLink do projeto: ${linkDoProjeto}`;
+            const fullFeedbackMsg = `⚠️ Olá, ${getStoreName()}! Avaliei o mockup 3D e gostaria de solicitar os seguintes ajustes:\n\n"${feedback}"\n\nLink do projeto: ${linkDoProjeto}`;
 
-            const meuNumeroWhatsApp = "5511939545816";
+            const numeroWhatsAppLoja = getStoreWhatsapp();
 
-            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(fullFeedbackMsg)}`;
+            if (!numeroWhatsAppLoja) {
+                showToast("⚠️ WhatsApp da loja não configurado.");
+                return;
+            }
+
+            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsAppLoja}&text=${encodeURIComponent(fullFeedbackMsg)}`;
 
             showToast("📱 A abrir o WhatsApp...");
 
@@ -2449,6 +2543,10 @@
         // Clicou no botão do Google
         btnGoogleLogin.addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({
+                prompt: 'select_account'
+            });
+
             try {
                 await signInWithPopup(auth, provider);
             } catch (error) {
@@ -2469,18 +2567,10 @@
             }
         });
 
-        // Clicou no botão Criar Conta (Email/Senha)
-        btnEmailSignup.addEventListener('click', async () => {
-            const email = authEmail.value;
-            const password = authPassword.value;
-            if (!email || !password) return showToast("⚠️ Digite um email e uma senha.");
-            if (password.length < 6) return showToast("⚠️ A senha deve ter no mínimo 6 letras.");
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                showToast("✅ Conta criada com sucesso!");
-            } catch (error) {
-                showToast("❌ Erro ao criar conta. O email já existe?");
-            }
+        // Cadastro público desativado no MVP comercial.
+        // Crie usuários diretamente no Firebase Console ou libere emails em STORE_CONFIG.allowedDesignerEmails.
+        btnEmailSignup?.addEventListener('click', async () => {
+            showToast("⛔ Cadastro público desativado. Solicite liberação ao administrador.");
         });
 
         // Clicou em Sair
@@ -2496,10 +2586,11 @@
             const isClientViewer = params.has('id');
 
             if (isClientViewer) {
-                // MODO CLIENTE: Oculta a tela de login e deixa entrar direto
+                // MODO CLIENTE: Oculta login e bloqueia o painel do designer antes de carregar o projeto.
                 loginScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
                 mainApp.classList.add('flex');
+                enterClientShellMode();
 
                 // Inicializa o 3D e puxa a arte do servidor
                 initThreeJS();
@@ -2507,8 +2598,14 @@
                 updateApp();
             } else {
                 // MODO DESIGNER: Exige Autenticação para entrar
-                onAuthStateChanged(auth, (user) => {
+                onAuthStateChanged(auth, async (user) => {
                     if (user) {
+                        if (!isDesignerEmailAllowed(user)) {
+                            showToast("⛔ Este email não tem permissão para acessar o painel.");
+                            await signOut(auth);
+                            return;
+                        }
+
                         // Está logado: Oculta o login e mostra o site
                         loginScreen.classList.add('hidden');
                         mainApp.classList.remove('hidden');
