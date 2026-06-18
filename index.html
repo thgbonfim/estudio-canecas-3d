@@ -428,7 +428,7 @@
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Ideias Comerciais Rápidas - Agente V2:</span>
+                            <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Ideias Comerciais Rápidas - Agente V3:</span>
                             <div class="flex flex-wrap gap-2">
                                 <button
                                     class="quick-prompt-btn text-left text-xs bg-black/45 border border-white/5 hover:border-violet-500/50 px-3 py-2 rounded-xl text-gray-300 hover:text-violet-300 transition-all"
@@ -461,19 +461,19 @@
                                     🐾 Pet personalizado
                                 </button>
                             </div>
-                            <p class="text-[10px] text-gray-600 leading-relaxed">Dica: para nomes e frases, escreva no campo acima exatamente o texto que deseja. Modelos gratuitos podem errar letras; para texto perfeito, use a arte gerada como base e finalize a frase no editor/manual.</p>
+                            <p class="text-[10px] text-gray-600 leading-relaxed">Dica: para nomes e frases, escreva no campo acima exatamente o texto que deseja. Agora o Agente V3 tenta gerar a ilustração sem letras e o MugStudio escreve o texto correto por cima no canvas.</p>
                         </div>
 
                         <div id="aiConsoleBox"
                             class="bg-black/60 border border-violet-950/40 rounded-2xl p-4 font-mono text-xs flex flex-col gap-2 min-h-[140px] justify-between">
                             <div class="flex justify-between items-center text-gray-500 border-b border-white/5 pb-1.5">
-                                <span><i class="fa-solid fa-brain"></i> AGENTE COMERCIAL V2:</span>
+                                <span><i class="fa-solid fa-brain"></i> AGENTE COMERCIAL V3:</span>
                                 <span id="aiStatusBadge" class="text-emerald-400 flex items-center gap-1"><span
                                         class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Pronto para vender</span>
                             </div>
                             <div id="aiThoughtLog"
                                 class="text-violet-300/95 leading-relaxed overflow-y-auto max-h-[100px]">
-                                "Olá! Agente Comercial V2 ativo. Crio artes planificadas para canecas com foco em datas comemorativas, presentes personalizados e sublimação 205x92mm."
+                                "Olá! Agente Comercial V3 ativo. Crio artes planificadas para canecas com foco em datas comemorativas, presentes personalizados e sublimação 205x92mm."
                             </div>
                             <div class="text-[10px] text-gray-600 border-t border-white/5 pt-1 flex justify-between">
                                 <span>Resolução Real: 205mm x 92mm</span>
@@ -1023,6 +1023,8 @@
                 drawImageWithTransform(bannerCtx, img, marginX, 0, box);
                 bannerCtx.filter = 'none';
 
+                drawCommercialOverlayText(bannerCtx, marginX + (printW * 0.5), h * 0.5, printW);
+
                 bannerCtx.restore();
             } else {
                 bannerCtx.fillStyle = state.exteriorColor;
@@ -1133,6 +1135,94 @@
                 ctx.arc(0, 100, 5, 0, 2 * Math.PI);
                 ctx.fill();
             }
+
+            ctx.restore();
+        }
+
+
+        function getOverlayTextDefaults(userPrompt) {
+            const promptText = String(userPrompt || '');
+            const quotedTexts = extractQuotedText(promptText);
+            const theme = detectCommercialTheme(promptText);
+
+            if (quotedTexts.length) {
+                return {
+                    line1: quotedTexts[0] || '',
+                    line2: quotedTexts[1] || ''
+                };
+            }
+
+            if (theme?.name === 'Dia dos Pais') {
+                return { line1: 'OS DIAS DO PAI', line2: 'TE AMO, PAI' };
+            }
+            if (theme?.name === 'Dia das Mães') {
+                return { line1: 'MÃE', line2: 'AMOR MAIOR' };
+            }
+            if (theme?.name === 'Namorados') {
+                return { line1: 'NOSSO AMOR', line2: 'EM CADA DETALHE' };
+            }
+            if (theme?.name === 'Corporativo') {
+                return { line1: 'BRINDE', line2: 'CORPORATIVO' };
+            }
+            if (theme?.name === 'Infantil') {
+                return { line1: 'AVENTURA DO', line2: 'MIGUEL' };
+            }
+            if (theme?.name === 'Pet') {
+                return { line1: 'AMOR', line2: 'DE PET' };
+            }
+
+            return { line1: '', line2: '' };
+        }
+
+        function syncManualTextInputs() {
+            if (inputTextL1) inputTextL1.value = state.textLine1 || '';
+            if (inputTextL2) inputTextL2.value = state.textLine2 || '';
+            if (colorText) colorText.value = state.textColor || '#18344A';
+            if (selectFont) selectFont.value = state.fontFamily || 'Montserrat';
+        }
+
+        function drawCommercialOverlayText(ctx, centerX, centerY, maxWidth) {
+            const line1 = normalizeText(state.textLine1, 80);
+            const line2 = normalizeText(state.textLine2, 80);
+            if (!line1 && !line2) return;
+
+            const font = state.fontFamily || 'Montserrat';
+            const mainColor = state.textColor || '#18344A';
+            const safeMaxWidth = maxWidth * 0.72;
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.shadowColor = 'rgba(255,255,255,0.75)';
+            ctx.shadowBlur = 10;
+            ctx.lineJoin = 'round';
+
+            if (line1) {
+                ctx.font = `900 48px "${font}", Montserrat, sans-serif`;
+                ctx.lineWidth = 8;
+                ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+                ctx.strokeText(line1.toUpperCase(), centerX, centerY - 36, safeMaxWidth);
+                ctx.fillStyle = mainColor;
+                ctx.fillText(line1.toUpperCase(), centerX, centerY - 36, safeMaxWidth);
+            }
+
+            if (line2) {
+                ctx.font = `900 70px "${font}", Montserrat, sans-serif`;
+                ctx.lineWidth = 10;
+                ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+                ctx.strokeText(line2.toUpperCase(), centerX, centerY + 34, safeMaxWidth);
+                ctx.fillStyle = mainColor;
+                ctx.fillText(line2.toUpperCase(), centerX, centerY + 34, safeMaxWidth);
+            }
+
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(217,119,6,0.9)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 120, centerY + 94);
+            ctx.lineTo(centerX + 120, centerY + 94);
+            ctx.stroke();
 
             ctx.restore();
         }
@@ -1713,7 +1803,13 @@
             'table scene',
             'cropped subject',
             'broken composition',
-            'random unreadable text artifacts'
+            'random unreadable text artifacts',
+            'letters',
+            'words',
+            'captions',
+            'typography',
+            'fake text',
+            'misspelled text'
         ].join(', ');
 
         function extractQuotedText(userPrompt) {
@@ -1731,21 +1827,21 @@
             const theme = detectCommercialTheme(cleanPrompt);
             const quotedTexts = extractQuotedText(cleanPrompt);
             const exactTextInstruction = quotedTexts.length
-                ? `Exact readable Portuguese text to include, preserve spelling and accents: ${quotedTexts.map(text => `"${text}"`).join(', ')}`
-                : 'If text is needed, keep it short, large, centered, readable, in Portuguese, with no random letters';
+                ? `Final readable Portuguese text will be added by the MugStudio editor overlay, not by the image model: ${quotedTexts.map(text => `"${text}"`).join(', ')}`
+                : 'If text is needed, it will be added later by the MugStudio editor overlay';
 
             return [
                 'MASTERPIECE COMMERCIAL ARTWORK FOR PERSONALIZED MUG SUBLIMATION',
-                'Create a FLAT HORIZONTAL PRINTABLE WRAP, not a product mockup, not a photo of a mug',
+                'Create a FLAT HORIZONTAL PRINTABLE WRAP BACKGROUND, not a product mockup, not a photo of a mug',
                 'Canvas aspect ratio exactly 205mm x 92mm, panoramic horizontal banner, full wrap design',
                 `Client request: ${cleanPrompt}`,
                 theme ? `Commercial theme detected: ${theme.name}. ${theme.prompt}` : 'Commercial personalized gift mug wrap, attractive for Brazilian print shop customers',
                 `Visual style: ${style}`,
                 exactTextInstruction,
-                'Composition requirements: rich illustrated design across the banner, no empty gray areas, no blank sides, no large unused space, repeat small decorative elements across the entire wrap',
+                'Composition requirements: rich illustrated background across the banner, no empty gray areas, no blank sides, no large unused space, repeat small decorative elements across the entire wrap',
                 'Keep the important title and faces in the central safe area, leave subtle continuation pattern toward the left and right edges for the mug handle area',
-                'Use clean readable hierarchy, premium gift shop aesthetics, crisp details, print-ready colors, high contrast but not polluted',
-                'No photographic scene, no hands, no table, no realistic mug, no perspective; only the flat artwork that will be printed on the mug',
+                'Use premium gift shop aesthetics, crisp details, print-ready colors, high contrast but not polluted, leave a clean central space for later text overlay',
+                'CRITICAL: do not draw any words, letters, captions, typography, numbers, logo text or fake text. No photographic scene, no hands, no table, no realistic mug, no perspective; only the flat illustrated background that will be printed on the mug',
                 `Negative prompt: ${NEGATIVE_PROMPT}`
             ].join(', ');
         }
@@ -1929,7 +2025,7 @@
             state.imageAdjustments = adj;
             updateApp();
 
-            safeSetText(aiThoughtLog, `Diretor de Arte CG editou a arte: ${actions.join(', ')}.`);
+            safeSetText(aiThoughtLog, `Agente Comercial V3 editou a arte: ${actions.join(', ')}.`);
             aiStatusBadge.className = 'text-emerald-400 flex items-center gap-1';
             aiStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte editada';
             showToast('🎨 Arte editada pelo Diretor de Arte CG.');
@@ -1946,12 +2042,12 @@
 
             canvasLoader.classList.remove('hidden');
             aiStatusBadge.className = "text-violet-400 flex items-center gap-1";
-            aiStatusBadge.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Ativando Agente Comercial V2...`;
+            aiStatusBadge.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Ativando Agente Comercial V3...`;
             aiThoughtLog.classList.add('typing');
             const detectedTheme = detectCommercialTheme(query);
             safeSetText(aiThoughtLog, detectedTheme
-                ? `Agente V2 detectou tema comercial: ${detectedTheme.name}. Construindo uma arte planificada 205x92mm com composição de presente personalizado...`
-                : 'Agente V2 está criando uma arte planificada comercial para sublimação. Aguarde um instante...');
+                ? `Agente V3 detectou tema comercial: ${detectedTheme.name}. Construindo uma arte planificada 205x92mm com composição de presente personalizado...`
+                : 'Agente V3 está criando uma arte planificada comercial para sublimação. Aguarde um instante...');
 
             // Prompt técnico do agente especialista em arte comercial para canecas.
             const queryEnglish = buildCGPrompt(query);
@@ -1992,11 +2088,13 @@
                     resetImageAdjustments();
                     resetImageTransform();
 
-                    // Esconde textos para não atrapalhar a arte principal gerada pelo diretor de arte.
-                    state.textLine1 = '';
-                    state.textLine2 = '';
-                    inputTextL1.value = '';
-                    inputTextL2.value = '';
+                    // Texto perfeito é aplicado pelo canvas do MugStudio, não pelo gerador de imagem.
+                    const overlayText = getOverlayTextDefaults(prompt);
+                    state.textLine1 = overlayText.line1;
+                    state.textLine2 = overlayText.line2;
+                    state.textColor = '#18344A';
+                    state.fontFamily = 'Montserrat';
+                    syncManualTextInputs();
 
                     state.exteriorColor = '#121214';
                     state.interiorColor = '#FFFFFF';
@@ -2007,7 +2105,7 @@
                     aiStatusBadge.className = "text-emerald-400 flex items-center gap-1";
                     aiStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Arte 4K Criada!`;
                     aiThoughtLog.classList.remove('typing');
-                    safeSetText(aiThoughtLog, `Agente Comercial V2 criou uma arte print-ready para caneca: "${normalizeText(prompt, 120)}". Proporção 205x92mm preservada, composição panorâmica e sem achatamento.`);
+                    safeSetText(aiThoughtLog, `Agente Comercial V3 criou uma base ilustrada e aplicou texto editável para caneca: "${normalizeText(prompt, 120)}". Proporção 205x92mm preservada, composição panorâmica e sem achatamento.`);
 
                     updateApp();
                 };
@@ -2295,7 +2393,7 @@
 
         document.querySelectorAll('.quick-prompt-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const text = e.currentTarget.dataset.prompt || e.currentTarget.textContent.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, "").trim();
+                const text = e.currentTarget.textContent.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, "").trim();
                 aiPromptText.value = text;
                 executeAIDesignAgent(text);
             });
@@ -2379,6 +2477,9 @@
                 state.customFullBannerImage = img;
                 state.customLogoImage = null;
                 state.customLogoName = null;
+                state.textLine1 = '';
+                state.textLine2 = '';
+                syncManualTextInputs();
                 resetImageAdjustments();
                 resetImageTransform();
 
